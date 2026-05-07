@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0f0a1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Life RPG 🐉</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0f0a1e;
+    --bg2: #1a1030;
+    --card: #1e1535;
+    --card2: #261d42;
+    --border: #3d2d6e;
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+    --gold: #f59e0b;
+    --gold2: #fcd34d;
+    --green: #10b981;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --cyan: #06b6d4;
+    --pink: #ec4899;
+    --text: #e2d9f3;
+    --text2: #9d8dc4;
+    --nav-h: 64px;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 20% 20%, rgba(124,58,237,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.1) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ─── NAV ─── */
+  #nav {
+    position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h);
+    background: rgba(26,16,48,0.97);
+    border-top: 1px solid var(--border);
+    display: flex; z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px; cursor: pointer; transition: all 0.2s;
+    border: none; background: none; color: var(--text2);
+    font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 600;
+    padding: 4px 0;
+  }
+  .nav-btn .icon { font-size: 18px; transition: transform 0.2s; }
+  .nav-btn.active { color: var(--accent2); }
+  .nav-btn.active .icon { transform: scale(1.2); }
+
+  /* Scrollable nav */
+  #nav { overflow-x: auto; overflow-y: hidden; }
+  #nav::-webkit-scrollbar { display: none; }
+
+  /* ─── SECTIONS ─── */
+  main { padding: 12px 12px calc(var(--nav-h) + 12px); position: relative; z-index: 1; max-width: 480px; margin: 0 auto; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+  }
+  .card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    color: var(--text2); text-transform: uppercase; margin-bottom: 10px;
+  }
+
+  h2.section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px; color: var(--accent2);
+    margin-bottom: 14px; letter-spacing: 1px;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap { background: var(--bg2); border-radius: 100px; height: 10px; overflow: hidden; margin: 6px 0; }
+  .progress-bar {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.5s ease;
+  }
+  .progress-bar.gold { background: linear-gradient(90deg, var(--gold), var(--gold2)); }
+  .progress-bar.green { background: linear-gradient(90deg, #059669, var(--green)); }
+  .progress-bar.red { background: linear-gradient(90deg, #dc2626, var(--red)); }
+
+  /* ─── STATS ROW ─── */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card {
+    background: var(--card2); border-radius: 10px; padding: 10px; text-align: center;
+    border: 1px solid var(--border);
+  }
+  .stat-val { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700; }
+  .stat-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ─── XP BAR ─── */
+  .xp-bar-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 12px; }
+  .xp-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .level-badge {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #1a0a00; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 900;
+    padding: 3px 10px; border-radius: 100px;
+  }
+
+  /* ─── FORMS ─── */
+  .input-group { margin-bottom: 10px; }
+  label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input, textarea, select {
+    width: 100%; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; color: var(--text);
+    font-family: 'Rajdhani', sans-serif; font-size: 15px;
+    outline: none; transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent2); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
+    transition: all 0.2s; letter-spacing: 0.5px;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
+  .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #1a0a00; }
+  .btn-green { background: linear-gradient(135deg, #059669, var(--green)); color: white; }
+  .btn-red { background: linear-gradient(135deg, #dc2626, var(--red)); color: white; }
+  .btn-ghost { background: var(--card2); color: var(--text2); border: 1px solid var(--border); }
+  .btn:active { transform: scale(0.96); }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* ─── TAGS / BADGES ─── */
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 700;
+  }
+  .badge-purple { background: rgba(124,58,237,0.3); color: var(--accent2); border: 1px solid var(--accent); }
+  .badge-gold { background: rgba(245,158,11,0.2); color: var(--gold2); border: 1px solid var(--gold); }
+  .badge-green { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid var(--green); }
+  .badge-red { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid var(--red); }
+  .badge-blue { background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid var(--blue); }
+
+  /* ─── LIST ITEMS ─── */
+  .list-item {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+  }
+  .list-item .item-icon { font-size: 22px; flex-shrink: 0; }
+  .list-item .item-body { flex: 1; }
+  .list-item .item-title { font-weight: 600; font-size: 15px; }
+  .list-item .item-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  /* ─── KANBAN ─── */
+  .kanban-wrap { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+  .kanban-wrap::-webkit-scrollbar { height: 4px; }
+  .kanban-wrap::-webkit-scrollbar-track { background: var(--bg2); border-radius: 4px; }
+  .kanban-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .kanban-col {
+    flex: 0 0 200px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px;
+  }
+  .kanban-col-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 1px; margin-bottom: 10px; }
+  .kanban-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px; margin-bottom: 8px; cursor: grab; font-size: 13px;
+  }
+  .kanban-card .k-tag { font-size: 10px; color: var(--text2); margin-top: 4px; }
+
+  /* ─── ФИНАНСЫ ─── */
+  .finance-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .finance-row:last-child { border-bottom: none; }
+  .fin-plus { color: var(--green); font-weight: 700; }
+  .fin-minus { color: var(--red); font-weight: 700; }
+
+  /* ─── ПОБЕДЫ ─── */
+  .victory-card {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(252,211,77,0.05));
+    border: 1px solid rgba(245,158,11,0.4); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px;
+  }
+  .victory-title { font-size: 16px; font-weight: 700; }
+  .victory-date { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* ─── TOAST ─── */
+  #toast {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px);
+    background: var(--card2); border: 1px solid var(--green); color: var(--green);
+    padding: 10px 20px; border-radius: 100px; font-size: 14px; font-weight: 700;
+    z-index: 999; transition: transform 0.3s ease; white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ─── MISC ─── */
+  .row { display: flex; gap: 8px; }
+  .row .btn { flex: 1; }
+  .divider { height: 1px; background: var(--border); margin: 12px 0; }
+  .text-gold { color: var(--gold2); }
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-accent { color: var(--accent2); }
+  .mt8 { margin-top: 8px; }
+  .emoji-big { font-size: 32px; }
+
+  /* Drag handle for kanban */
+  .kanban-card:active { cursor: grabbing; opacity: 0.8; }
+
+  /* Checklist */
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .check-item:last-child { border-bottom: none; }
+  .check-box { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s; }
+  .check-item.done .check-box { background: var(--green); border-color: var(--green); }
+  .check-item.done .check-label { text-decoration: line-through; color: var(--text2); }
+  .check-label { font-size: 14px; flex: 1; }
+
+  /* Quest item */
+  .quest-item { margin-bottom: 12px; background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  .quest-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .quest-name { font-weight: 700; font-size: 15px; }
+  .quest-xp { font-family: 'Orbitron', monospace; font-size: 11px; color: var(--gold2); }
+
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<main>
+  <!-- ══════════ ПАНЕЛЬ ══════════ -->
+  <div id="s-dashboard" class="section active">
+    <div class="xp-bar-wrap">
+      <div class="xp-row">
+        <div>
+          <div style="font-family:'Orbitron',monospace;font-size:18px;font-weight:900;color:var(--accent2)">ГЕРОЙ ЖИЗНИ</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">Уровень растёт с каждым действием ⚡</div>
+        </div>
+        <div class="level-badge">LVL <span id="lvl-num">7</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px">
+        <span>XP: <span id="xp-cur" class="text-accent">1240</span></span>
+        <span>до след. уровня: <span id="xp-next" class="text-accent">2000</span></span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" id="xp-bar" style="width:62%"></div></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val text-red">200K</div>
+        <div class="stat-label">💳 Долг ₽</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val text-green" id="dash-income">45K</div>
+        <div class="stat-label">💰 Доход/мес</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val text-gold" id="dash-streak">5</div>
+        <div class="stat-label">🔥 Стрик дней</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val text-accent" id="dash-quests">3/7</div>
+        <div class="stat-label">🎯 Квестов</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">🐉 Долг: закрыть 200 000 ₽</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:13px;color:var(--text2)">Погашено</span>
+        <span style="font-family:'Orbitron',monospace;font-size:13px;color:var(--gold2)" id="debt-paid-label">18 500 ₽</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar gold" id="debt-bar" style="width:9.25%"></div></div>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">Цель 3 мес: закрыть 20% → <span class="text-gold">40 000 ₽</span></div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:46%"></div></div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px">46% месячной цели</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Цели-боссы</div>
+      <div id="goals-dash"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚡ Последние активности</div>
+      <div id="activities-list"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ ВВОД ДНЯ ══════════ -->
+  <div id="s-input" class="section">
+    <h2 class="section-title">📲 Ввод дня</h2>
+
+    <div class="card">
+      <div class="card-title">🔥 Ежедневный ритуал</div>
+      <div id="daily-checks">
+        <div class="check-item" data-key="morning" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <span class="check-label">☀️ Утренняя рутина</span>
+          <span class="badge badge-purple">+10 XP</span>
+        </div>
+        <div class="check-item" data-key="sport" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <span class="check-label">💪 Спорт / тренировка</span>
+          <span class="badge badge-purple">+15 XP</span>
+        </div>
+        <div class="check-item" data-key="learning" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <span class="check-label">🧠 Учёба / AI / чтение</span>
+          <span class="badge badge-purple">+20 XP</span>
+        </div>
+        <div class="check-item" data-key="blog" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <span class="check-label">✍️ Работа над блогом</span>
+          <span class="badge badge-purple">+15 XP</span>
+        </div>
+        <div class="check-item" data-key="acting" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <span class="check-label">🎭 Актёрская работа</span>
+          <span class="badge badge-purple">+20 XP</span>
+        </div>
+        <div class="check-item" data-key="income_work" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <span class="check-label">💼 Работа на доход</span>
+          <span class="badge badge-gold">+25 XP</span>
+        </div>
+        <div class="check-item" data-key="debt_payment" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <span class="check-label">💳 Платёж по долгу</span>
+          <span class="badge badge-gold">+30 XP</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💭 Заметка дня</div>
+      <div class="input-group">
+        <textarea id="day-note" placeholder="Что сделал сегодня? Что чувствуешь? Идеи..."></textarea>
+      </div>
+      <div class="input-group">
+        <label>Настроение</label>
+        <select id="day-mood">
+          <option value="5">🔥 Огонь! Всё горит</option>
+          <option value="4" selected>😊 Хорошо, продуктивно</option>
+          <option value="3">😐 Нормально, работаю</option>
+          <option value="2">😔 Сложновато</option>
+          <option value="1">💀 Тяжёлый день</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="saveDay()">⚡ Сохранить день</button>
+    </div>
+  </div>
+
+  <!-- ══════════ ФИНАНСЫ ══════════ -->
+  <div id="s-finance" class="section">
+    <h2 class="section-title">💰 Финансы</h2>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val text-green" id="fin-income">45 000</div>
+        <div class="stat-label">Доход ₽</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val text-red" id="fin-expense">28 500</div>
+        <div class="stat-label">Расходы ₽</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">🎯 Цель: доход 100 000 ₽/мес</div>
+      <div class="progress-wrap" style="height:14px"><div class="progress-bar green" style="width:45%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px">
+        <span class="text-green">45 000 ₽</span><span class="text-accent2">→ 100 000 ₽</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">➕ Добавить транзакцию</div>
+      <div class="row">
+        <div class="input-group" style="flex:1">
+          <label>Сумма ₽</label>
+          <input type="number" id="fin-amount" placeholder="0">
+        </div>
+        <div class="input-group" style="flex:1">
+          <label>Тип</label>
+          <select id="fin-type">
+            <option value="income">+ Доход</option>
+            <option value="expense">- Расход</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Описание</label>
+        <input type="text" id="fin-desc" placeholder="Фриланс, еда, транспорт...">
+      </div>
+      <button class="btn btn-green btn-full" onclick="addTransaction()">💰 Добавить</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 История</div>
+      <div id="fin-history"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ ДОЛГ ══════════ -->
+  <div id="s-debt" class="section">
+    <h2 class="section-title">🐉 Убить дракона долга</h2>
+
+    <div class="card">
+      <div style="text-align:center;padding:10px 0">
+        <div class="emoji-big">🐉</div>
+        <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--red);margin-top:8px" id="debt-total">200 000 ₽</div>
+        <div style="color:var(--text2);font-size:13px">Осталось победить</div>
+      </div>
+      <div class="progress-wrap" style="height:16px;margin:12px 0">
+        <div class="progress-bar red" id="debt-bar2" style="width:9.25%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px">
+        <span class="text-green">Погашено: <strong id="debt-paid2">18 500 ₽</strong></span>
+        <span style="color:var(--text2)">9.25%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎯 Цель: 20% за 3 месяца</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px">Нужно погасить: <span class="text-gold">40 000 ₽</span></div>
+      <div class="progress-wrap"><div class="progress-bar gold" style="width:46.25%"></div></div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px">18 500 / 40 000 ₽ — 46%</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💸 Записать платёж</div>
+      <div class="input-group">
+        <label>Сумма платежа ₽</label>
+        <input type="number" id="debt-amount" placeholder="5000">
+      </div>
+      <div class="input-group">
+        <label>Комментарий</label>
+        <input type="text" id="debt-note" placeholder="Откуда деньги...">
+      </div>
+      <button class="btn btn-gold btn-full" onclick="addDebtPayment()">⚔️ Нанести удар по дракону!</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 История платежей</div>
+      <div id="debt-history"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ ЦЕЛИ ══════════ -->
+  <div id="s-goals" class="section">
+    <h2 class="section-title">🎯 Боссы-цели</h2>
+
+    <div id="goals-list"></div>
+
+    <div class="card">
+      <div class="card-title">➕ Новая цель</div>
+      <div class="input-group">
+        <label>Название цели</label>
+        <input type="text" id="goal-name" placeholder="Переехать / Запустить блог...">
+      </div>
+      <div class="row">
+        <div class="input-group" style="flex:1">
+          <label>Прогресс %</label>
+          <input type="number" id="goal-progress" placeholder="0" min="0" max="100">
+        </div>
+        <div class="input-group" style="flex:1">
+          <label>Эмодзи</label>
+          <input type="text" id="goal-emoji" placeholder="🏠" maxlength="4">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addGoal()">🎯 Добавить цель</button>
+    </div>
+  </div>
+
+  <!-- ══════════ КВЕСТЫ ══════════ -->
+  <div id="s-quests" class="section">
+    <h2 class="section-title">✅ Квесты</h2>
+
+    <div id="quests-list"></div>
+
+    <div class="card">
+      <div class="card-title">➕ Новый квест</div>
+      <div class="input-group">
+        <label>Название</label>
+        <input type="text" id="quest-name" placeholder="Написать 5 постов для блога">
+      </div>
+      <div class="row">
+        <div class="input-group" style="flex:1">
+          <label>XP награда</label>
+          <input type="number" id="quest-xp" placeholder="50">
+        </div>
+        <div class="input-group" style="flex:1">
+          <label>Категория</label>
+          <select id="quest-cat">
+            <option value="income">💰 Доход</option>
+            <option value="debt">🐉 Долг</option>
+            <option value="blog">✍️ Блог</option>
+            <option value="ai">🤖 AI</option>
+            <option value="acting">🎭 Актёрство</option>
+            <option value="life">🏠 Жизнь</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addQuest()">⚡ Добавить квест</button>
+    </div>
+  </div>
+
+  <!-- ══════════ КАНБАН ══════════ -->
+  <div id="s-kanban" class="section">
+    <h2 class="section-title">🧩 Канбан</h2>
+
+    <div class="kanban-wrap" id="kanban-board">
+      <div class="kanban-col" id="col-todo">
+        <div class="kanban-col-title" style="color:var(--text2)">📋 НАДО</div>
+        <div id="kanban-todo"></div>
+      </div>
+      <div class="kanban-col" id="col-doing">
+        <div class="kanban-col-title" style="color:var(--cyan)">⚡ В РАБОТЕ</div>
+        <div id="kanban-doing"></div>
+      </div>
+      <div class="kanban-col" id="col-done">
+        <div class="kanban-col-title" style="color:var(--green)">✅ ГОТОВО</div>
+        <div id="kanban-done"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">➕ Новая карточка</div>
+      <div class="input-group">
+        <label>Задача</label>
+        <input type="text" id="kanban-task" placeholder="Записать видео, отправить оффер...">
+      </div>
+      <div class="input-group">
+        <label>Колонка</label>
+        <select id="kanban-col-select">
+          <option value="todo">📋 Надо</option>
+          <option value="doing">⚡ В работе</option>
+          <option value="done">✅ Готово</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addKanbanCard()">🧩 Добавить</button>
+    </div>
+  </div>
+
+  <!-- ══════════ ПОБЕДЫ ══════════ -->
+  <div id="s-wins" class="section">
+    <h2 class="section-title">🏆 Победы</h2>
+
+    <div id="wins-list"></div>
+
+    <div class="card">
+      <div class="card-title">➕ Зафиксировать победу</div>
+      <div class="input-group">
+        <label>Победа</label>
+        <input type="text" id="win-title" placeholder="Получил первый заказ! Оплатил 5000₽ долга!">
+      </div>
+      <div class="input-group">
+        <label>Описание (опционально)</label>
+        <textarea id="win-desc" placeholder="Подробности победы..." style="min-height:60px"></textarea>
+      </div>
+      <button class="btn btn-gold btn-full" onclick="addWin()">🏆 Записать победу!</button>
+    </div>
+  </div>
+
+  <!-- ══════════ ОБЗОРЫ ══════════ -->
+  <div id="s-reviews" class="section">
+    <h2 class="section-title">📊 Обзоры</h2>
+
+    <div class="card">
+      <div class="card-title">📅 Эта неделя</div>
+      <div id="week-stats"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 Прогресс целей</div>
+      <div id="goals-review"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 Инсайты</div>
+      <div id="insights"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ НАСТРОЙКИ ══════════ -->
+  <div id="s-settings" class="section">
+    <h2 class="section-title">⚙️ Настройки</h2>
+
+    <div class="card">
+      <div class="card-title">👤 Профиль героя</div>
+      <div class="input-group">
+        <label>Имя героя</label>
+        <input type="text" id="hero-name" placeholder="Твоё имя">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="saveSettings()">💾 Сохранить</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">☁️ Синхронизация</div>
+      <div id="cloud-status" style="font-weight:700;margin-bottom:4px">🔴 Синхронизация выключена</div>
+      <div id="cloud-email" style="font-size:12px;color:var(--text2);margin-bottom:10px">Войди через Google, чтобы телефон и компьютер видели одни данные</div>
+      <button id="cloud-login-btn" class="btn btn-primary btn-full" onclick="signInGoogle()">🔐 Войти через Google</button>
+      <button id="cloud-logout-btn" class="btn btn-ghost btn-full" onclick="signOutGoogle()" style="display:none">🚪 Выйти из Google</button>
+      <div id="cloud-buttons" style="display:none;flex-direction:column;gap:8px;margin-top:8px">
+        <button class="btn btn-green btn-full" onclick="saveToCloud(true)">☁️ Сохранить в облако сейчас</button>
+        <button class="btn btn-ghost btn-full" onclick="loadFromCloud(true)">📥 Загрузить из облака</button>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.4">После входа данные будут автоматически сохраняться в Firebase. Экспорт JSON всё равно оставляем как резервную копию.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📦 Экспорт / Импорт</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-ghost btn-full" onclick="exportData()">📤 Экспортировать JSON</button>
+        <button class="btn btn-ghost btn-full" onclick="document.getElementById('import-file').click()">📥 Импортировать JSON</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🧹 Управление данными</div>
+      <button class="btn btn-red btn-full" onclick="clearTestData()">🗑️ Очистить тестовые данные</button>
+      <div style="font-size:12px;color:var(--text2);margin-top:8px;text-align:center">Удалит все данные и сбросит приложение</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">ℹ️ О приложении</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">
+        <b class="text-accent2">Life RPG</b> — твой инструмент для достижения целей.<br><br>
+        🐉 Убить долг 200 000 ₽<br>
+        💰 Выйти на доход 100K+ ₽<br>
+        🏠 Переехать<br>
+        ✍️ Вести блог<br>
+        🤖 Развиваться в AI<br>
+        🎭 Продвигаться в актёрстве<br><br>
+        <span style="color:var(--gold2)">Версия 1.0 — прототип 🚀</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ─── NAVIGATION ─── -->
+<nav id="nav">
+  <button class="nav-btn active" onclick="goTo('dashboard',this)"><span class="icon">🏠</span>Панель</button>
+  <button class="nav-btn" onclick="goTo('input',this)"><span class="icon">📲</span>Ввод</button>
+  <button class="nav-btn" onclick="goTo('finance',this)"><span class="icon">💰</span>Финансы</button>
+  <button class="nav-btn" onclick="goTo('debt',this)"><span class="icon">🐉</span>Долг</button>
+  <button class="nav-btn" onclick="goTo('goals',this)"><span class="icon">🎯</span>Цели</button>
+  <button class="nav-btn" onclick="goTo('quests',this)"><span class="icon">✅</span>Квесты</button>
+  <button class="nav-btn" onclick="goTo('kanban',this)"><span class="icon">🧩</span>Канбан</button>
+  <button class="nav-btn" onclick="goTo('wins',this)"><span class="icon">🏆</span>Победы</button>
+  <button class="nav-btn" onclick="goTo('reviews',this)"><span class="icon">📊</span>Обзоры</button>
+  <button class="nav-btn" onclick="goTo('settings',this)"><span class="icon">⚙️</span>Настройки</button>
+</nav>
+
+<!-- Firebase SDK для синхронизации телефона и компьютера -->
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+
+<script>
+// ════════════════════════════════════
+// FIREBASE CONFIG & CLOUD SYNC
+// ════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyAaAh_NdkWyUPuMwAEeYPT7uqKKbB0fLOs",
+  authDomain: "life-rpg-efe29.firebaseapp.com",
+  projectId: "life-rpg-efe29",
+  storageBucket: "life-rpg-efe29.firebasestorage.app",
+  messagingSenderId: "718842486288",
+  appId: "1:718842486288:web:0017bdee1b16782eba3495",
+  measurementId: "G-LETY3WC6PD"
+};
+
+let auth = null;
+let db = null;
+let cloudUser = null;
+let cloudSaveTimer = null;
+let isApplyingCloudState = false;
+
+function initFirebaseSync() {
+  try {
+    if (!window.firebase) { console.warn('Firebase SDK не загрузился'); return; }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+      cloudUser = user || null;
+      renderCloudStatus();
+      if (cloudUser) {
+        toast('☁️ Вход выполнен: ' + (cloudUser.email || 'Google'));
+        await loadFromCloud(false);
+      }
+    });
+  } catch (e) {
+    console.error(e);
+    toast('❌ Firebase не подключился');
+  }
+}
+
+function userDocRef() {
+  if (!db || !cloudUser) return null;
+  return db.collection('users').doc(cloudUser.uid);
+}
+
+async function signInGoogle() {
+  if (!auth) { toast('❌ Firebase ещё не готов'); return; }
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  } catch (e) {
+    console.error(e);
+    toast('❌ Вход не получился');
+  }
+}
+
+async function signOutGoogle() {
+  if (!auth) return;
+  await auth.signOut();
+  cloudUser = null;
+  renderCloudStatus();
+  toast('🚪 Вышла из Google');
+}
+
+async function saveToCloud(showToast = true) {
+  const ref = userDocRef();
+  if (!ref) { if (showToast) toast('⚠️ Сначала войди через Google'); return; }
+  try {
+    await ref.set({
+      state,
+      email: cloudUser.email || null,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    if (showToast) toast('☁️ Данные сохранены в облако');
+    renderCloudStatus();
+  } catch (e) {
+    console.error(e);
+    if (showToast) toast('❌ Не удалось сохранить в облако');
+  }
+}
+
+async function loadFromCloud(showToast = true) {
+  const ref = userDocRef();
+  if (!ref) { if (showToast) toast('⚠️ Сначала войди через Google'); return; }
+  try {
+    const snap = await ref.get();
+    if (snap.exists && snap.data().state) {
+      isApplyingCloudState = true;
+      state = snap.data().state;
+      saveData();
+      isApplyingCloudState = false;
+      renderCurrentSection();
+      if (showToast) toast('☁️ Данные загружены из облака');
+    } else {
+      await saveToCloud(false);
+      if (showToast) toast('☁️ Создала облачную копию');
+    }
+    renderCloudStatus();
+  } catch (e) {
+    console.error(e);
+    if (showToast) toast('❌ Не удалось загрузить облако');
+  }
+}
+
+function scheduleCloudSave() {
+  if (!cloudUser || isApplyingCloudState) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(() => saveToCloud(false), 900);
+}
+
+function renderCloudStatus() {
+  const status = document.getElementById('cloud-status');
+  const email = document.getElementById('cloud-email');
+  const inBtn = document.getElementById('cloud-login-btn');
+  const outBtn = document.getElementById('cloud-logout-btn');
+  const cloudBtns = document.getElementById('cloud-buttons');
+  if (!status) return;
+  if (cloudUser) {
+    status.textContent = '🟢 Синхронизация включена';
+    email.textContent = cloudUser.email || 'Google аккаунт';
+    if (inBtn) inBtn.style.display = 'none';
+    if (outBtn) outBtn.style.display = 'flex';
+    if (cloudBtns) cloudBtns.style.display = 'flex';
+  } else {
+    status.textContent = '🔴 Синхронизация выключена';
+    email.textContent = 'Войди через Google, чтобы телефон и компьютер видели одни данные';
+    if (inBtn) inBtn.style.display = 'flex';
+    if (outBtn) outBtn.style.display = 'none';
+    if (cloudBtns) cloudBtns.style.display = 'none';
+  }
+}
+
+function renderCurrentSection() {
+  const active = document.querySelector('.section.active');
+  const id = active ? active.id.replace('s-', '') : 'dashboard';
+  renderSection(id);
+}
+
+// ════════════════════════════════════
+// STATE & STORAGE
+// ════════════════════════════════════
+const DEFAULT_DATA = {
+  hero: { name: 'Герой', level: 7, xp: 1240, xpNext: 2000, streak: 5 },
+  debt: {
+    total: 200000,
+    paid: 18500,
+    payments: [
+      { date: '2025-03-01', amount: 5000, note: 'Фриланс-проект' },
+      { date: '2025-03-15', amount: 8500, note: 'Дополнительный заработок' },
+      { date: '2025-04-01', amount: 5000, note: 'Регулярный платёж' },
+    ]
+  },
+  finance: {
+    income: 45000,
+    expense: 28500,
+    transactions: [
+      { date: '2025-04-28', amount: 15000, type: 'income', desc: 'Фриланс-разработка' },
+      { date: '2025-04-25', amount: 8000, type: 'income', desc: 'Актёрская работа' },
+      { date: '2025-04-20', amount: 12000, type: 'income', desc: 'Основная работа' },
+      { date: '2025-04-18', amount: 8000, type: 'expense', desc: 'Аренда' },
+      { date: '2025-04-15', amount: 5000, type: 'expense', desc: 'Продукты' },
+      { date: '2025-04-10', amount: 3500, type: 'expense', desc: 'Транспорт и прочее' },
+      { date: '2025-04-05', amount: 10000, type: 'income', desc: 'AI-консультация' },
+    ]
+  },
+  goals: [
+    { id: 1, name: 'Закрыть долг 200К ₽', emoji: '🐉', progress: 9 },
+    { id: 2, name: 'Выйти на доход 100К ₽/мес', emoji: '💰', progress: 45 },
+    { id: 3, name: 'Переехать', emoji: '🏠', progress: 20 },
+    { id: 4, name: 'Вести блог (10 постов)', emoji: '✍️', progress: 30 },
+    { id: 5, name: 'Развиваться в AI', emoji: '🤖', progress: 55 },
+    { id: 6, name: 'Актёрская карьера', emoji: '🎭', progress: 35 },
+  ],
+  quests: [
+    { id: 1, name: 'Написать 5 постов для блога', xp: 100, cat: 'blog', done: false },
+    { id: 2, name: 'Пройти AI-курс до конца', xp: 150, cat: 'ai', done: false },
+    { id: 3, name: 'Заработать 50К за месяц', xp: 200, cat: 'income', done: false },
+    { id: 4, name: 'Внести 5000₽ в счёт долга', xp: 80, cat: 'debt', done: true },
+    { id: 5, name: 'Сняться в 2 проектах', xp: 120, cat: 'acting', done: false },
+    { id: 6, name: 'Найти новую квартиру', xp: 100, cat: 'life', done: false },
+    { id: 7, name: 'Запустить Telegram-канал', xp: 90, cat: 'blog', done: true },
+  ],
+  kanban: {
+    todo: [
+      { id: 1, text: 'Записать вводное видео для блога', tag: '🎬' },
+      { id: 2, text: 'Изучить промпт-инжиниринг', tag: '🤖' },
+      { id: 3, text: 'Подать заявки в 3 агентства', tag: '🎭' },
+    ],
+    doing: [
+      { id: 4, text: 'Написать 2 статьи про AI', tag: '✍️' },
+      { id: 5, text: 'Фриланс: сайт клиенту', tag: '💼' },
+    ],
+    done: [
+      { id: 6, text: 'Создать Telegram канал', tag: '📱' },
+      { id: 7, text: 'Разобраться с Claude API', tag: '🤖' },
+    ]
+  },
+  wins: [
+    { id: 1, date: '2025-04-25', title: '🏆 Первый платёж 5000₽ по долгу!', desc: 'Начало конца дракона!' },
+    { id: 2, date: '2025-04-20', title: '🎭 Прошёл кастинг на рекламу', desc: 'Небольшой, но реальный проект' },
+    { id: 3, date: '2025-04-15', title: '🤖 Запустил первый AI-проект', desc: 'Автоматизировал рутину на 3 часа в неделю' },
+    { id: 4, date: '2025-04-10', title: '✍️ Написал первый пост в блог', desc: 'Тема: "Как я решил закрыть долг с помощью AI"' },
+    { id: 5, date: '2025-04-01', title: '💰 Доход 45К в апреле!', desc: 'Выше прошлого месяца на 10К' },
+  ],
+  dailyChecks: {},
+  activities: [
+    { date: '2025-04-28', text: '⚡ Выполнил 6/7 ритуалов дня', xp: 95 },
+    { date: '2025-04-27', text: '💰 Получил оплату 15 000₽', xp: 25 },
+    { date: '2025-04-26', text: '🐉 Платёж 5 000₽ по долгу', xp: 30 },
+    { date: '2025-04-25', text: '🎭 Съёмки в рекламе', xp: 20 },
+  ]
+};
+
+function loadData() {
+  try {
+    const s = localStorage.getItem('liferpg_data');
+    return s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+}
+
+function saveData() {
+  localStorage.setItem('liferpg_data', JSON.stringify(state));
+  scheduleCloudSave();
+}
+
+let state = loadData();
+
+// ════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════
+function goTo(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  btn.classList.add('active');
+  renderSection(id);
+}
+
+function renderSection(id) {
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'finance') renderFinance();
+  if (id === 'debt') renderDebt();
+  if (id === 'goals') renderGoals();
+  if (id === 'quests') renderQuests();
+  if (id === 'kanban') renderKanban();
+  if (id === 'wins') renderWins();
+  if (id === 'reviews') renderReviews();
+  if (id === 'input') renderInput();
+  if (id === 'settings') renderSettings();
+}
+
+// ════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════
+function renderDashboard() {
+  const h = state.hero;
+  document.getElementById('lvl-num').textContent = h.level;
+  document.getElementById('xp-cur').textContent = h.xp;
+  document.getElementById('xp-next').textContent = h.xpNext;
+  document.getElementById('xp-bar').style.width = Math.round(h.xp / h.xpNext * 100) + '%';
+  document.getElementById('dash-streak').textContent = h.streak;
+
+  const qDone = state.quests.filter(q => q.done).length;
+  document.getElementById('dash-quests').textContent = qDone + '/' + state.quests.length;
+
+  const pct = Math.round(state.debt.paid / state.debt.total * 100 * 100) / 100;
+  document.getElementById('debt-paid-label').textContent = fmt(state.debt.paid) + ' ₽';
+  document.getElementById('debt-bar').style.width = pct + '%';
+
+  // Goals dash
+  const gl = document.getElementById('goals-dash');
+  gl.innerHTML = state.goals.slice(0, 4).map(g => `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+        <span>${g.emoji} ${g.name}</span><span class="text-accent2">${g.progress}%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${g.progress}%"></div></div>
+    </div>`).join('');
+
+  // Activities
+  const al = document.getElementById('activities-list');
+  al.innerHTML = state.activities.slice(0, 5).map(a => `
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <span>${a.text}</span>
+      <span class="badge badge-purple">+${a.xp} XP</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════
+// INPUT
+// ════════════════════════════════════
+function renderInput() {
+  const today = todayStr();
+  const checks = state.dailyChecks[today] || {};
+  document.querySelectorAll('.check-item[data-key]').forEach(el => {
+    const k = el.dataset.key;
+    if (checks[k]) el.classList.add('done'); else el.classList.remove('done');
+  });
+}
+
+function toggleCheck(el) {
+  const today = todayStr();
+  if (!state.dailyChecks[today]) state.dailyChecks[today] = {};
+  const k = el.dataset.key;
+  const xpMap = { morning:10, sport:15, learning:20, blog:15, acting:20, income_work:25, debt_payment:30 };
+  if (el.classList.contains('done')) {
+    el.classList.remove('done');
+    delete state.dailyChecks[today][k];
+  } else {
+    el.classList.add('done');
+    state.dailyChecks[today][k] = true;
+    addXP(xpMap[k] || 10);
+    toast('✨ +' + (xpMap[k]||10) + ' XP!');
+  }
+  saveData();
+}
+
+function saveDay() {
+  const note = document.getElementById('day-note').value;
+  const mood = document.getElementById('day-mood').value;
+  if (note) {
+    state.activities.unshift({ date: todayStr(), text: '📝 ' + note.slice(0,40), xp: 5 });
+    saveData();
+  }
+  toast('🌟 День сохранён!');
+}
+
+// ════════════════════════════════════
+// FINANCE
+// ════════════════════════════════════
+function renderFinance() {
+  calcFinanceTotals();
+  document.getElementById('fin-income').textContent = fmt(state.finance.income);
+  document.getElementById('fin-expense').textContent = fmt(state.finance.expense);
+
+  const hist = document.getElementById('fin-history');
+  hist.innerHTML = state.finance.transactions.slice(0,10).map(t => `
+    <div class="finance-row">
+      <div>
+        <div style="font-size:14px">${t.desc}</div>
+        <div style="font-size:11px;color:var(--text2)">${t.date}</div>
+      </div>
+      <span class="${t.type === 'income' ? 'fin-plus' : 'fin-minus'}">${t.type==='income'?'+':'-'}${fmt(t.amount)} ₽</span>
+    </div>`).join('');
+}
+
+function calcFinanceTotals() {
+  state.finance.income = state.finance.transactions.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+  state.finance.expense = state.finance.transactions.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+}
+
+function addTransaction() {
+  const amount = parseInt(document.getElementById('fin-amount').value);
+  const type = document.getElementById('fin-type').value;
+  const desc = document.getElementById('fin-desc').value || (type === 'income' ? 'Доход' : 'Расход');
+  if (!amount || amount <= 0) { toast('❌ Введи сумму'); return; }
+  state.finance.transactions.unshift({ date: todayStr(), amount, type, desc });
+  calcFinanceTotals();
+  saveData();
+  document.getElementById('fin-amount').value = '';
+  document.getElementById('fin-desc').value = '';
+  renderFinance();
+  toast(type === 'income' ? '💰 Доход записан!' : '💸 Расход записан!');
+  addXP(type === 'income' ? 15 : 5);
+}
+
+// ════════════════════════════════════
+// DEBT
+// ════════════════════════════════════
+function renderDebt() {
+  const pct = state.debt.paid / state.debt.total * 100;
+  document.getElementById('debt-total').textContent = fmt(state.debt.total - state.debt.paid) + ' ₽';
+  document.getElementById('debt-paid2').textContent = fmt(state.debt.paid) + ' ₽';
+  document.getElementById('debt-bar2').style.width = pct + '%';
+
+  const hist = document.getElementById('debt-history');
+  hist.innerHTML = state.debt.payments.slice(0,10).map(p => `
+    <div class="finance-row">
+      <div>
+        <div style="font-size:14px">⚔️ ${p.note}</div>
+        <div style="font-size:11px;color:var(--text2)">${p.date}</div>
+      </div>
+      <span class="fin-plus">-${fmt(p.amount)} ₽</span>
+    </div>`).join('');
+}
+
+function addDebtPayment() {
+  const amount = parseInt(document.getElementById('debt-amount').value);
+  const note = document.getElementById('debt-note').value || 'Платёж';
+  if (!amount || amount <= 0) { toast('❌ Введи сумму'); return; }
+  state.debt.paid += amount;
+  state.debt.payments.unshift({ date: todayStr(), amount, note });
+  state.activities.unshift({ date: todayStr(), text: `🐉 Платёж ${fmt(amount)}₽ по долгу`, xp: 30 });
+  saveData();
+  document.getElementById('debt-amount').value = '';
+  document.getElementById('debt-note').value = '';
+  renderDebt();
+  toast('⚔️ Дракон ранен! -' + fmt(amount) + ' ₽');
+  addXP(30);
+}
+
+// ════════════════════════════════════
+// GOALS
+// ════════════════════════════════════
+function renderGoals() {
+  const el = document.getElementById('goals-list');
+  el.innerHTML = state.goals.map(g => `
+    <div class="quest-item">
+      <div class="quest-header">
+        <div class="quest-name">${g.emoji} ${g.name}</div>
+        <span class="badge ${g.progress >= 100 ? 'badge-green' : 'badge-purple'}">${g.progress}%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar ${g.progress >= 100 ? 'green' : ''}" style="width:${g.progress}%"></div></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn btn-ghost btn-sm" onclick="updateGoalProgress(${g.id}, -10)">-10%</button>
+        <button class="btn btn-ghost btn-sm" onclick="updateGoalProgress(${g.id}, 10)">+10%</button>
+        <button class="btn btn-red btn-sm" onclick="deleteGoal(${g.id})" style="margin-left:auto">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function updateGoalProgress(id, delta) {
+  const g = state.goals.find(g => g.id === id);
+  if (!g) return;
+  g.progress = Math.max(0, Math.min(100, g.progress + delta));
+  if (g.progress === 100) toast('🎉 Цель достигнута! ' + g.name);
+  saveData(); renderGoals();
+}
+
+function deleteGoal(id) {
+  state.goals = state.goals.filter(g => g.id !== id);
+  saveData(); renderGoals();
+}
+
+function addGoal() {
+  const name = document.getElementById('goal-name').value.trim();
+  const progress = parseInt(document.getElementById('goal-progress').value) || 0;
+  const emoji = document.getElementById('goal-emoji').value || '🎯';
+  if (!name) { toast('❌ Введи название'); return; }
+  const id = Date.now();
+  state.goals.push({ id, name, emoji, progress });
+  saveData();
+  document.getElementById('goal-name').value = '';
+  document.getElementById('goal-progress').value = '';
+  document.getElementById('goal-emoji').value = '';
+  renderGoals();
+  toast('🎯 Цель добавлена!');
+}
+
+// ════════════════════════════════════
+// QUESTS
+// ════════════════════════════════════
+const catLabels = { income:'💰',debt:'🐉',blog:'✍️',ai:'🤖',acting:'🎭',life:'🏠' };
+
+function renderQuests() {
+  const el = document.getElementById('quests-list');
+  const active = state.quests.filter(q => !q.done);
+  const done = state.quests.filter(q => q.done);
+  el.innerHTML = [...active, ...done].map(q => `
+    <div class="quest-item" style="${q.done ? 'opacity:0.6' : ''}">
+      <div class="quest-header">
+        <div class="quest-name">${q.done ? '✅' : '⬜'} ${q.name}</div>
+        <span class="quest-xp">+${q.xp} XP</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="badge badge-purple">${catLabels[q.cat] || '📌'} ${q.cat}</span>
+        <div style="display:flex;gap:6px">
+          ${!q.done ? `<button class="btn btn-green btn-sm" onclick="completeQuest(${q.id})">✅ Выполнить</button>` : ''}
+          <button class="btn btn-red btn-sm" onclick="deleteQuest(${q.id})">🗑️</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function completeQuest(id) {
+  const q = state.quests.find(q => q.id === id);
+  if (!q) return;
+  q.done = true;
+  addXP(q.xp);
+  state.activities.unshift({ date: todayStr(), text: `✅ Квест выполнен: ${q.name.slice(0,30)}`, xp: q.xp });
+  saveData(); renderQuests();
+  toast('🎉 Квест выполнен! +' + q.xp + ' XP');
+}
+
+function deleteQuest(id) {
+  state.quests = state.quests.filter(q => q.id !== id);
+  saveData(); renderQuests();
+}
+
+function addQuest() {
+  const name = document.getElementById('quest-name').value.trim();
+  const xp = parseInt(document.getElementById('quest-xp').value) || 50;
+  const cat = document.getElementById('quest-cat').value;
+  if (!name) { toast('❌ Введи название квеста'); return; }
+  state.quests.push({ id: Date.now(), name, xp, cat, done: false });
+  saveData();
+  document.getElementById('quest-name').value = '';
+  document.getElementById('quest-xp').value = '';
+  renderQuests();
+  toast('⚡ Квест добавлен!');
+}
+
+// ════════════════════════════════════
+// KANBAN
+// ════════════════════════════════════
+function renderKanban() {
+  ['todo', 'doing', 'done'].forEach(col => {
+    document.getElementById('kanban-' + col).innerHTML =
+      (state.kanban[col] || []).map(c => `
+        <div class="kanban-card" draggable="true" data-id="${c.id}" data-col="${col}">
+          ${c.text}
+          <div class="k-tag">${c.tag}</div>
+        </div>`).join('');
+  });
+  setupDragDrop();
+}
+
+function addKanbanCard() {
+  const text = document.getElementById('kanban-task').value.trim();
+  const col = document.getElementById('kanban-col-select').value;
+  if (!text) { toast('❌ Введи задачу'); return; }
+  const tags = { todo:'📋', doing:'⚡', done:'✅' };
+  state.kanban[col].push({ id: Date.now(), text, tag: tags[col] });
+  saveData();
+  document.getElementById('kanban-task').value = '';
+  renderKanban();
+  toast('🧩 Задача добавлена!');
+}
+
+function setupDragDrop() {
+  let dragged = null;
+  document.querySelectorAll('.kanban-card').forEach(card => {
+    card.addEventListener('dragstart', e => { dragged = card; card.style.opacity = '0.5'; });
+    card.addEventListener('dragend', () => { card.style.opacity = '1'; dragged = null; });
+  });
+  ['todo','doing','done'].forEach(col => {
+    const el = document.getElementById('kanban-' + col);
+    el.addEventListener('dragover', e => e.preventDefault());
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragged) return;
+      const fromCol = dragged.dataset.col;
+      const id = parseInt(dragged.dataset.id);
+      if (fromCol === col) return;
+      const idx = state.kanban[fromCol].findIndex(c => c.id === id);
+      if (idx === -1) return;
+      const [card] = state.kanban[fromCol].splice(idx, 1);
+      state.kanban[col].push(card);
+      saveData(); renderKanban();
+      if (col === 'done') { toast('✅ Готово! +10 XP'); addXP(10); }
+    });
+  });
+}
+
+// ════════════════════════════════════
+// WINS
+// ════════════════════════════════════
+function renderWins() {
+  const el = document.getElementById('wins-list');
+  el.innerHTML = state.wins.map(w => `
+    <div class="victory-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="victory-title">${w.title}</div>
+        <button class="btn btn-ghost btn-sm" onclick="deleteWin(${w.id})" style="padding:2px 8px;font-size:14px">×</button>
+      </div>
+      ${w.desc ? `<div style="font-size:13px;color:var(--text2);margin-top:4px">${w.desc}</div>` : ''}
+      <div class="victory-date">${w.date}</div>
+    </div>`).join('');
+}
+
+function addWin() {
+  const title = document.getElementById('win-title').value.trim();
+  const desc = document.getElementById('win-desc').value.trim();
+  if (!title) { toast('❌ Введи победу'); return; }
+  state.wins.unshift({ id: Date.now(), date: todayStr(), title, desc });
+  saveData();
+  document.getElementById('win-title').value = '';
+  document.getElementById('win-desc').value = '';
+  renderWins();
+  toast('🏆 Победа записана!');
+  addXP(25);
+}
+
+function deleteWin(id) {
+  state.wins = state.wins.filter(w => w.id !== id);
+  saveData(); renderWins();
+}
+
+// ════════════════════════════════════
+// REVIEWS
+// ════════════════════════════════════
+function renderReviews() {
+  const ws = document.getElementById('week-stats');
+  const doneQ = state.quests.filter(q => q.done).length;
+  const totalIncome = state.finance.transactions.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+  ws.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val text-green">${fmt(totalIncome)}</div><div class="stat-label">Доход ₽</div></div>
+      <div class="stat-card"><div class="stat-val text-gold">${state.wins.length}</div><div class="stat-label">Побед</div></div>
+      <div class="stat-card"><div class="stat-val text-accent">${doneQ}</div><div class="stat-label">Квестов</div></div>
+      <div class="stat-card"><div class="stat-val text-red">${fmt(state.debt.paid)}</div><div class="stat-label">Погашено ₽</div></div>
+    </div>`;
+
+  const gr = document.getElementById('goals-review');
+  gr.innerHTML = state.goals.map(g => `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+        <span>${g.emoji} ${g.name}</span><span class="text-accent2">${g.progress}%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${g.progress}%"></div></div>
+    </div>`).join('');
+
+  const ins = document.getElementById('insights');
+  const insights = [];
+  if (state.debt.paid / state.debt.total < 0.1) insights.push('🐉 Дракон почти не тронут — нужен первый удар побольше!');
+  if (totalIncome < 100000) insights.push(`💰 До цели 100K ещё ${fmt(100000 - totalIncome)} ₽ — ищи новые источники дохода`);
+  if (state.hero.streak < 7) insights.push('🔥 Стрик меньше 7 дней — укрепляй ежедневные ритуалы!');
+  if (doneQ < state.quests.length / 2) insights.push('✅ Меньше половины квестов выполнено — выбери 1-2 приоритетных');
+  ins.innerHTML = insights.map(i => `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">${i}</div>`).join('') || '<div style="color:var(--text2);font-size:13px">Данных пока мало — веди записи каждый день!</div>';
+}
+
+// ════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════
+function renderSettings() {
+  document.getElementById('hero-name').value = state.hero.name || '';
+  renderCloudStatus();
+}
+
+function saveSettings() {
+  state.hero.name = document.getElementById('hero-name').value || 'Герой';
+  saveData();
+  toast('💾 Настройки сохранены!');
+}
+
+function exportData() {
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'liferpg_backup_' + todayStr() + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('📤 Данные экспортированы!');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      state = JSON.parse(e.target.result);
+      saveData();
+      toast('📥 Данные импортированы!');
+      renderDashboard();
+    } catch(err) { toast('❌ Ошибка импорта'); }
+  };
+  reader.readAsText(file);
+}
+
+function clearTestData() {
+  if (!confirm('Удалить все данные и начать заново?')) return;
+  localStorage.removeItem('liferpg_data');
+  state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  // Clear
+  state.quests = [];
+  state.wins = [];
+  state.finance.transactions = [];
+  state.finance.income = 0;
+  state.finance.expense = 0;
+  state.debt.paid = 0;
+  state.debt.payments = [];
+  state.activities = [];
+  state.kanban = { todo: [], doing: [], done: [] };
+  state.goals = state.goals.map(g => ({ ...g, progress: 0 }));
+  state.hero = { name: 'Герой', level: 1, xp: 0, xpNext: 500, streak: 0 };
+  saveData();
+  toast('🧹 Данные очищены!');
+  renderDashboard();
+}
+
+// ════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════
+function addXP(amount) {
+  state.hero.xp += amount;
+  while (state.hero.xp >= state.hero.xpNext) {
+    state.hero.xp -= state.hero.xpNext;
+    state.hero.level++;
+    state.hero.xpNext = Math.round(state.hero.xpNext * 1.5);
+    setTimeout(() => toast('🎉 LEVEL UP! Уровень ' + state.hero.level + '!'), 500);
+  }
+  saveData();
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString('ru-RU');
+}
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+initFirebaseSync();
+renderDashboard();
+</script>
+</body>
+</html>
