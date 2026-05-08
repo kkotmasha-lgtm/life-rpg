@@ -19,15 +19,15 @@
   --fh:'Rajdhani',sans-serif;--fb:'Nunito',sans-serif;--fm:'JetBrains Mono',monospace;
   --r:13px;--rs:8px;--rl:18px;--nav:58px;--top:50px;
 }
-html{font-size:15px;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100dvh;overflow-x:hidden;padding-bottom:calc(var(--nav)+10px)}
+html{font-size:15px;-webkit-tap-highlight-color:transparent;height:100%}
+body{background:var(--bg);color:var(--tx);font-family:var(--fb);height:100%;overflow:hidden;display:flex;flex-direction:column}
 button{cursor:pointer;font-family:var(--fb)}
 input,textarea,select{font-family:var(--fb)}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:var(--p2);border-radius:2px}
 body.theme-teal{--p:#00e5c5;--p2:#00b8a0;--pg:rgba(0,229,197,.12);--ps:rgba(0,229,197,.07);--bd:rgba(0,229,197,.18)}
 body.theme-light{--p:#e8186d;--p2:#b5124e;--bg:#f4f4f8;--s1:#fff;--s2:#f0f0f5;--s3:#e4e4ec;--bd2:rgba(0,0,0,.08);--bd3:rgba(0,0,0,.04);--tx:#1a1a2e;--t2:#6666a0;--t3:#aaaacc}
-#topbar{position:sticky;top:0;z-index:200;height:var(--top);background:var(--bg);border-bottom:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:8px}
+#topbar{position:relative;z-index:200;flex-shrink:0;height:var(--top);background:var(--bg);border-bottom:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:8px}
 .tb-logo{font-family:var(--fh);font-size:18px;font-weight:700;letter-spacing:2px;color:var(--p);flex-shrink:0}
 .tb-right{display:flex;align-items:center;gap:8px}
 .xp-pill{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--bd2);border-radius:20px;padding:4px 10px 4px 7px;font-size:12px;font-family:var(--fm)}
@@ -35,12 +35,13 @@ body.theme-light{--p:#e8186d;--p2:#b5124e;--bg:#f4f4f8;--s1:#fff;--s2:#f0f0f5;--
 .xp-num{color:var(--t2)}
 .auth-btn{background:none;border:1px solid var(--bd2);color:var(--t2);border-radius:var(--rs);padding:5px 10px;font-size:12px;transition:.2s}
 .auth-avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--p);object-fit:cover}
-#botnav{position:fixed;bottom:0;left:0;right:0;z-index:200;height:var(--nav);background:var(--s1);border-top:1px solid var(--bd2);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0)}
+#botnav{position:relative;z-index:200;flex-shrink:0;height:var(--nav);background:var(--s1);border-top:1px solid var(--bd2);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0)}
 .nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;color:var(--t3);transition:.2s;padding:4px 2px;min-width:0}
 .nav-tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .nav-tab.active{color:var(--p)}
 .nav-tab span{font-size:9px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42px}
-.page{display:none;padding:14px;animation:fadeIn .18s ease}
+#pages-wrap{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.page{display:none;padding:14px;padding-bottom:calc(var(--nav)+40px);animation:fadeIn .18s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .card{background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r);padding:14px;margin-bottom:12px}
@@ -87,7 +88,7 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.5}
 .modal-handle{width:36px;height:4px;background:var(--s3);border-radius:2px;margin:0 auto 16px}
 .form-row{margin-bottom:12px}
 .form-lbl{font-size:11px;color:var(--t2);margin-bottom:5px;display:block;letter-spacing:.5px}
-#toast{position:fixed;bottom:calc(var(--nav)+12px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--p);border-radius:var(--rs);padding:9px 16px;font-size:13px;z-index:600;opacity:0;transition:.3s;white-space:nowrap;pointer-events:none;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--p);border-radius:var(--rs);padding:9px 16px;font-size:13px;z-index:600;opacity:0;transition:.3s;white-space:nowrap;pointer-events:none;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 /* hero card */
 .hero-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
@@ -252,6 +253,7 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.5}
   </div>
 </div>
 
+<div id="pages-wrap">
 <!-- ══ DASHBOARD ══ -->
 <div id="page-dashboard" class="page active">
   <div class="hero-card">
@@ -479,6 +481,7 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.5}
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
 </div>
 
+</div>
 <!-- ══ NAV ══ -->
 <nav id="botnav">
   <button class="nav-tab active" onclick="showPage('dashboard')" id="tab-dashboard">
@@ -542,7 +545,23 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.5}
     <div class="modal-title" id="goal-modal-title">Новая цель-босс</div>
     <input type="hidden" id="goal-edit-id">
     <div class="form-row"><label class="form-lbl">Название</label><input class="inp" id="g-name" placeholder="Закрыть долг, переехать..."></div>
-    <div class="form-row"><label class="form-lbl">Иконка</label><input class="inp" id="g-icon" placeholder="🏆" maxlength="2" style="max-width:80px"></div>
+    <div class="form-row"><label class="form-lbl">Иконка</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="goal-icon-pick">
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="🏆">🏆</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="💸">💸</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="💰">💰</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="🏠">🏠</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="✍️">✍️</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="🚀">🚀</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="💪">💪</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="🌟">🌟</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="🎯">🎯</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="📚">📚</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="🌸">🌸</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickGIco(this)" data-ico="❤️">❤️</span>
+      </div>
+      <input class="inp" id="g-icon" placeholder="Или введи своё..." maxlength="2" style="max-width:110px">
+    </div>
     <div class="form-row"><label class="form-lbl">Тип прогресса</label>
       <div style="display:flex;gap:12px;margin-top:4px">
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="g-type" value="subtasks" checked> Шаги</label>
@@ -1129,14 +1148,16 @@ function renderGoals(){
     let body='';
     if(g.type==='subtasks'){
       const subs=g.subtasks||[];
-      body=`<div style="margin-top:10px">${subs.map(s=>`<div class="row-item ${s.done?'done':''}" onclick="toggleSubtask('${g.id}','${s.id}')" style="margin-bottom:5px;padding:8px 10px">
+      body=`<div style="margin-top:10px">
+      <button class="add-row" onclick="openSubtaskModal('${g.id}')" style="font-size:11px;padding:7px 10px;margin-top:0;margin-bottom:8px">
+        <svg viewBox="0 0 24 24" width="12" height="12"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>+ Добавить шаг
+      </button>
+      ${subs.map(s=>`<div class="row-item ${s.done?'done':''}" onclick="toggleSubtask('${g.id}','${s.id}')" style="margin-bottom:5px;padding:8px 10px">
         <div class="check-box ${s.done?'on':''}"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="row-body"><div class="row-title" style="font-size:12px">${escHtml(s.name)}</div></div>
         <button class="btn btn-g btn-sm btn-ic" onclick="event.stopPropagation();delSubtask('${g.id}','${s.id}')" style="color:var(--red);font-size:11px">✕</button>
       </div>`).join('')}
-      <button class="add-row" onclick="openSubtaskModal('${g.id}')" style="font-size:11px;padding:7px 10px;margin-top:4px">
-        <svg viewBox="0 0 24 24" width="12" height="12"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить шаг
-      </button></div>`;
+      </div>`;
     } else {
       body=`<div style="margin-top:10px;display:flex;gap:8px;align-items:center">
         <input class="inp" type="number" value="${g.current||0}" style="flex:1" onchange="updateGoalNum('${g.id}',this.value)" placeholder="Текущее">
@@ -1186,20 +1207,36 @@ function updateGoalNum(id,val){
   saveData(d);renderGoals();
 }
 function deleteGoal(id){if(!confirm('Удалить цель?'))return;const d=getData();d.goals=d.goals.filter(g=>g.id!==id);saveData(d);renderGoals();}
+let selGIco='🏆';
+function pickGIco(el){
+  selGIco=el.dataset.ico;
+  document.querySelectorAll('#goal-icon-pick span').forEach(s=>s.style.borderColor='transparent');
+  el.style.borderColor='var(--p)';
+  document.getElementById('g-icon').value='';
+}
 function openGoalModal(editId){
+  selGIco='🏆';
   document.getElementById('goal-edit-id').value=editId||'';
   document.getElementById('goal-modal-title').textContent=editId?'Изменить цель':'Новая цель-босс';
+  document.querySelectorAll('#goal-icon-pick span').forEach(s=>s.style.borderColor='transparent');
+  // highlight default
+  const def=document.querySelector('#goal-icon-pick [data-ico="🏆"]');
+  if(def)def.style.borderColor='var(--p)';
   if(editId){
     const d=getData();const g=d.goals.find(x=>x.id===editId);if(!g)return;
     document.getElementById('g-name').value=g.name||'';
-    document.getElementById('g-icon').value=g.icon||'🏆';
+    document.getElementById('g-icon').value='';
+    selGIco=g.icon||'🏆';
+    const m=document.querySelector('#goal-icon-pick [data-ico="'+g.icon+'"]');
+    document.querySelectorAll('#goal-icon-pick span').forEach(s=>s.style.borderColor='transparent');
+    if(m)m.style.borderColor='var(--p)'; else document.getElementById('g-icon').value=g.icon||'';
     const isNum=g.type==='numeric';
     document.querySelector('input[name="g-type"][value="subtasks"]').checked=!isNum;
     document.querySelector('input[name="g-type"][value="numeric"]').checked=isNum;
     document.getElementById('g-num-fields').style.display=isNum?'':'none';
     if(isNum){document.getElementById('g-target').value=g.target||'';document.getElementById('g-unit').value=g.unit||'';}
   } else {
-    document.getElementById('g-name').value='';document.getElementById('g-icon').value='🏆';
+    document.getElementById('g-name').value='';document.getElementById('g-icon').value='';
     document.querySelector('input[name="g-type"][value="subtasks"]').checked=true;
     document.getElementById('g-num-fields').style.display='none';
   }
@@ -1214,13 +1251,13 @@ function saveGoal(){
   const d=getData();
   if(editId){
     const g=d.goals.find(x=>x.id===editId);if(!g)return;
-    g.name=name;g.icon=document.getElementById('g-icon').value||'🏆';
+    g.name=name;g.icon=document.getElementById('g-icon').value.trim()||selGIco||'🏆';
     if(type==='numeric'&&g.type!=='numeric'){g.type='numeric';g.current=0;g.target=parseFloat(document.getElementById('g-target')?.value)||100;g.unit=document.getElementById('g-unit')?.value||'%';}
     else if(type==='numeric'){g.target=parseFloat(document.getElementById('g-target')?.value)||100;g.unit=document.getElementById('g-unit')?.value||'%';}
     else{g.type='subtasks';}
     saveData(d);closeModal('modal-goal');renderGoals();showToast('Цель обновлена ✓');
   } else {
-    const g={id:uid(),name,icon:document.getElementById('g-icon').value||'🏆',type,subtasks:[],xpAwarded:false};
+    const g={id:uid(),name,icon:document.getElementById('g-icon').value.trim()||selGIco||'🏆',type,subtasks:[],xpAwarded:false};
     if(type==='numeric'){g.current=0;g.target=parseFloat(document.getElementById('g-target')?.value)||100;g.unit=document.getElementById('g-unit')?.value||'%';}
     d.goals.push(g);saveData(d);closeModal('modal-goal');renderGoals();showToast('Цель добавлена ✓');
   }
@@ -1625,8 +1662,8 @@ function updateAuthUI(user){
 }
 
 /* ── MODALS ── */
-function openModal(id){document.getElementById(id)?.classList.add('open');document.body.style.overflow='hidden';}
-function closeModal(id){document.getElementById(id)?.classList.remove('open');document.body.style.overflow='';}
+function openModal(id){document.getElementById(id)?.classList.add('open');}
+function closeModal(id){document.getElementById(id)?.classList.remove('open');}
 document.querySelectorAll('.modal-bg').forEach(mb=>mb.addEventListener('click',e=>{if(e.target===mb)closeModal(mb.id);}));
 
 /* ── TOAST ── */
