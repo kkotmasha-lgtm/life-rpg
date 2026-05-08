@@ -1067,9 +1067,10 @@ function renderSchedule(ds){
     const height=em&&em>sm?Math.max(32,(em-sm)*PX-3):40;
     const timeLabel=s&&e2?s+'–'+e2:s;
     const doneStyle=ev.done?'opacity:.6;text-decoration:line-through':'';
-    evHtml+=`<div class="event-block ${ev.cat||'pink'}" style="top:${top}px;height:${height}px" onclick="toggleEventDone('${ds}','${ev.id}')">
+    evHtml+=`<div class="event-block ${ev.cat||'pink'}" style="top:${top}px;height:${height}px;padding-right:26px" onclick="toggleEventDone('${ds}','${ev.id}')">
       <div class="ev-title" style="${doneStyle}">${ev.done?'✓ ':''} ${escHtml(ev.title)}</div>
       <div class="ev-time">${timeLabel}</div>
+      <button onclick="event.stopPropagation();delEvent('${ds}','${ev.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.3);border:none;color:#fff;border-radius:4px;width:20px;height:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
     </div>`;
   });
 
@@ -1101,6 +1102,12 @@ function saveEvent(){
   const d=getData(); if(!d.events[selDate])d.events[selDate]=[];
   d.events[selDate].push({id:uid(),title,start:document.getElementById('ev-start').value,end:document.getElementById('ev-end').value,cat:document.getElementById('ev-cat').value,note:document.getElementById('ev-note').value.trim(),done:false});
   saveData(d); closeModal('modal-event'); renderCalendar(); showToast('Событие добавлено ✓');
+}
+function delEvent(ds,id){
+  if(!confirm('Удалить событие?'))return;
+  const d=getData();
+  if(d.events[ds])d.events[ds]=d.events[ds].filter(e=>e.id!==id);
+  saveData(d);renderCalendar();renderSchedule(ds);showToast('Событие удалено');
 }
 
 /* ── KANBAN ── */
