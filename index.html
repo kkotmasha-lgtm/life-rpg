@@ -220,6 +220,27 @@ textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
 .more-item{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;transition:.15s;font-size:14px;font-weight:500}
 .more-item:hover,.more-item.active{background:var(--ps);border-color:var(--bd);color:var(--p)}
 .more-item-ico{font-size:20px;flex-shrink:0;width:26px;text-align:center}
+
+/* ── THEMES ── */
+body.theme-teal{--p:#00e5c5;--p2:#00b8a0;--pg:rgba(0,229,197,.12);--ps:rgba(0,229,197,.07);--bd:rgba(0,229,197,.18)}
+body.theme-light{--p:#e8186d;--p2:#b5124e;--pg:rgba(232,24,109,.08);--ps:rgba(232,24,109,.05);--bd:rgba(232,24,109,.2);--bg:#f4f4f8;--s1:#ffffff;--s2:#f0f0f5;--s3:#e4e4ec;--s4:#d8d8e8;--bd2:rgba(0,0,0,.08);--bd3:rgba(0,0,0,.04);--tx:#1a1a2e;--t2:#6666a0;--t3:#aaaacc}
+/* ── ACHIEV TOAST ── */
+.achiev-popup{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:700;background:var(--s1);border:2px solid var(--gold);border-radius:var(--rl);padding:14px 20px;display:flex;align-items:center;gap:14px;max-width:320px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.4);transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none}
+.achiev-popup.show{transform:translateX(-50%) translateY(0);opacity:1}
+.achiev-ico{font-size:32px;flex-shrink:0}
+.achiev-body{}
+.achiev-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-family:var(--fm);margin-bottom:2px}
+.achiev-name{font-family:var(--fh);font-size:16px;font-weight:700;color:var(--tx)}
+.achiev-desc{font-size:11px;color:var(--t2);margin-top:2px}
+/* ── LEVEL UP POPUP ── */
+.lvlup-popup{position:fixed;inset:0;z-index:800;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);opacity:0;pointer-events:none;transition:opacity .3s}
+.lvlup-popup.show{opacity:1;pointer-events:all}
+.lvlup-card{background:var(--s1);border:2px solid var(--p);border-radius:var(--rl);padding:32px 28px;text-align:center;max-width:300px;width:90%;transform:scale(.85);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.lvlup-popup.show .lvlup-card{transform:scale(1)}
+.lvlup-num{font-family:var(--fh);font-size:72px;font-weight:700;color:var(--p);line-height:1}
+.lvlup-title{font-family:var(--fh);font-size:22px;font-weight:700;letter-spacing:2px;margin:8px 0 4px}
+.lvlup-reward{font-size:13px;color:var(--t2);margin-bottom:6px;line-height:1.5}
+.lvlup-subtitle{font-size:13px;color:var(--gold);font-family:var(--fm)}
 </style>
 
 </head>
@@ -250,7 +271,7 @@ textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
 <div id="page-dashboard" class="page active">
   <div class="hero-card">
     <div class="hero-name">Мари ⚡</div>
-    <div class="hero-sub">Уровень растёт с каждым действием</div>
+    <div class="hero-sub" id="hero-sub-text">Уровень растёт с каждым действием</div>
     <div class="prog-track"><div class="prog-fill" id="xp-bar" style="width:0%"></div></div>
     <div class="hero-xp-row"><span>XP: <b id="d-xp">0</b></span><span>до след. уровня: <b id="d-xp-next" style="color:var(--p)">500</b></span></div>
   </div>
@@ -305,31 +326,81 @@ textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
 </div>
 
 <div id="page-finance" class="page">
-  <div class="debt-hero">
-    <div class="debt-row">
-      <div><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Долг</div><div style="font-family:var(--fh);font-size:30px;font-weight:700;color:var(--red)" id="fin-debt">200 000 ₽</div></div>
-      <div style="text-align:right"><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Погашено</div><div style="font-family:var(--fh);font-size:22px;font-weight:700;color:var(--grn)" id="fin-paid">0 ₽</div></div>
+  <!-- tabs -->
+  <div style="display:flex;gap:6px;margin-bottom:12px">
+    <button class="btn btn-p btn-sm" id="ftab-debt" onclick="finTab('debt')">Долг</button>
+    <button class="btn btn-g btn-sm" id="ftab-income" onclick="finTab('income')">Доходы</button>
+    <button class="btn btn-g btn-sm" id="ftab-expense" onclick="finTab('expense')">Расходы</button>
+    <button class="btn btn-g btn-sm" id="ftab-savings" onclick="finTab('savings')">Накопления</button>
+  </div>
+  <!-- DEBT TAB -->
+  <div id="fin-tab-debt">
+    <div class="debt-hero">
+      <div class="debt-row">
+        <div><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Долг</div><div style="font-family:var(--fh);font-size:30px;font-weight:700;color:var(--red)" id="fin-debt">200 000 ₽</div></div>
+        <div style="text-align:right"><div style="font-size:11px;color:var(--t2);margin-bottom:4px">Погашено</div><div style="font-family:var(--fh);font-size:22px;font-weight:700;color:var(--grn)" id="fin-paid">0 ₽</div></div>
+      </div>
+      <div class="prog-track" style="height:10px"><div class="prog-fill" id="fin-bar" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-top:5px;font-family:var(--fm)"><span>0%</span><span id="fin-pct">0% закрыто</span><span>100%</span></div>
+      <div class="payment-row">
+        <input class="inp" type="number" id="payment-inp" placeholder="Сумма платежа ₽" style="flex:1">
+        <button class="btn btn-p" onclick="makePayment()">Погасить</button>
+      </div>
     </div>
-    <div class="prog-track" style="height:10px"><div class="prog-fill" id="fin-bar" style="width:0%"></div></div>
-    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-top:5px;font-family:var(--fm)">
-      <span>0%</span><span id="fin-pct">0% закрыто</span><span>100%</span>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="stat-mini"><div class="lbl">ДОХОД/МЕС</div><div class="v v-t" id="fin-income">45 000 ₽</div></div>
+      <div class="stat-mini"><div class="lbl">СВОБОДА ЧЕРЕЗ</div><div class="v v-pu" id="fin-months">— мес</div></div>
     </div>
-    <div class="payment-row">
-      <input class="inp" type="number" id="payment-inp" placeholder="Сумма платежа ₽" style="flex:1">
-      <button class="btn btn-p" onclick="makePayment()">Погасить</button>
+    <div class="card"><div class="card-title">История платежей</div><div id="fin-history"></div></div>
+  </div>
+  <!-- INCOME TAB -->
+  <div id="fin-tab-income" style="display:none">
+    <div class="card">
+      <div class="card-title">Источники дохода</div>
+      <div id="fin-income-list"></div>
+      <button class="add-row" onclick="openIncomeModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Добавить доход
+      </button>
+    </div>
+    <div class="stat-mini" style="margin-bottom:12px"><div class="lbl">ИТОГО В МЕСЯЦ</div><div class="v v-t" id="fin-total-income">0 ₽</div></div>
+    <div class="card"><div class="card-title">История доходов</div><div id="fin-income-history"></div></div>
+  </div>
+  <!-- EXPENSE TAB -->
+  <div id="fin-tab-expense" style="display:none">
+    <div class="card">
+      <div class="card-title">Добавить расход</div>
+      <div class="form-row" style="margin-bottom:8px"><input class="inp" type="number" id="exp-amount" placeholder="Сумма ₽"></div>
+      <div class="form-row" style="margin-bottom:8px"><input class="inp" type="text" id="exp-name" placeholder="Название (кофе, аренда...)"></div>
+      <div class="form-row" style="margin-bottom:10px">
+        <select class="inp" id="exp-cat">
+          <option value="🍕 Еда">🍕 Еда</option>
+          <option value="🏠 Жильё">🏠 Жильё</option>
+          <option value="🚗 Транспорт">🚗 Транспорт</option>
+          <option value="💆 Здоровье">💆 Здоровье</option>
+          <option value="📱 Подписки">📱 Подписки</option>
+          <option value="🛍 Покупки">🛍 Покупки</option>
+          <option value="🎉 Развлечения">🎉 Развлечения</option>
+          <option value="📚 Обучение">📚 Обучение</option>
+          <option value="💸 Другое">💸 Другое</option>
+        </select>
+      </div>
+      <button class="btn btn-p" onclick="addExpense()">Добавить</button>
+    </div>
+    <div class="card"><div class="card-title">Расходы этого месяца</div><div id="fin-exp-summary"></div></div>
+    <div class="card"><div class="card-title">История расходов</div><div id="fin-exp-history"></div></div>
+  </div>
+  <!-- SAVINGS TAB -->
+  <div id="fin-tab-savings" style="display:none">
+    <div class="card">
+      <div class="card-title">Копилки</div>
+      <div id="fin-savings-list"></div>
+      <button class="add-row" onclick="openSavingsModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Новая копилка
+      </button>
     </div>
   </div>
-  <div class="g2" style="margin-bottom:12px">
-    <div class="stat-mini"><div class="lbl">ДОХОД/МЕС</div><div class="v v-t" id="fin-income">45 000 ₽</div></div>
-    <div class="stat-mini"><div class="lbl">СВОБОДА ЧЕРЕЗ</div><div class="v v-pu" id="fin-months">— мес</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Цель 3 мес: закрыть 20%</div>
-    <div style="font-size:13px;color:var(--t2);margin-bottom:8px">→ закрыть <b style="color:var(--p)" id="fin-3mo-target">40 000 ₽</b></div>
-    <div class="prog-track"><div class="prog-fill" id="fin-3mo-bar" style="width:0%"></div></div>
-    <div style="font-size:11px;color:var(--t2);margin-top:4px" id="fin-3mo-pct">0% месячной цели</div>
-  </div>
-  <div class="card"><div class="card-title">История платежей</div><div id="fin-history"></div></div>
 </div>
 
 <div id="page-kanban" class="page">
@@ -373,6 +444,20 @@ textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
   <div class="notes-grid" id="notes-grid"></div>
 </div>
 
+<div id="page-achievements" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-family:var(--fh);font-size:18px;font-weight:700;letter-spacing:.5px">Мои достижения</div>
+    <button class="btn btn-p btn-sm" onclick="openAchievModal()">+ Добавить</button>
+  </div>
+  <div id="my-achiev-list"></div>
+  <div id="my-achiev-empty" style="display:none;text-align:center;padding:40px 20px;color:var(--t2)">
+    <div style="font-size:40px;margin-bottom:12px">🏅</div>
+    <div style="font-size:14px;font-weight:500;margin-bottom:6px">Пока пусто</div>
+    <div style="font-size:12px;color:var(--t3)">Добавь своё первое достижение — то, чем ты гордишься</div>
+  </div>
+</div>
+
+
 <div id="page-settings" class="page">
   <div class="setting-item" id="set-auth-row">
     <div><div class="setting-lbl" id="set-auth-name">Не авторизована</div><div class="setting-sub" id="set-auth-email">Данные только локально</div></div>
@@ -394,8 +479,16 @@ textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
     <div><div class="setting-lbl">Импорт данных</div><div class="setting-sub">Восстановить из JSON</div></div>
     <button class="btn btn-g btn-sm" onclick="document.getElementById('import-file').click()">Загрузить</button>
   </div>
+  <div class="setting-item">
+    <div><div class="setting-lbl">Тема оформления</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" id="th-pink" onclick="setTheme('pink')" style="background:var(--p);color:#fff;border:2px solid transparent">Розовая</button>
+      <button class="btn btn-g btn-sm" id="th-teal" onclick="setTheme('teal')">Бирюза</button>
+      <button class="btn btn-g btn-sm" id="th-light" onclick="setTheme('light')">Светлая</button>
+    </div>
+  </div>
   <div style="margin-top:4px;font-size:11px;color:var(--t3);padding:0 4px;line-height:1.6">
-    Версия 1.0 · life-rpg-efe29 · GitHub Pages<br>Данные: localStorage + Firestore (после входа)
+    Версия 2.0 · life-rpg-efe29 · GitHub Pages<br>Данные: localStorage + Firestore (после входа)
   </div>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
 </div>
@@ -428,6 +521,7 @@ textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
       <div class="more-item" onclick="showPageFromMore('health')"><span class="more-item-ico">❤️</span>Здоровье</div>
       <div class="more-item" onclick="showPageFromMore('mood')"><span class="more-item-ico">🙂</span>Настроение</div>
       <div class="more-item" onclick="showPageFromMore('notes')"><span class="more-item-ico">📝</span>Заметки</div>
+      <div class="more-item" onclick="showPageFromMore('achievements')"><span class="more-item-ico">🏅</span>Достижения</div>
       <div class="more-item" onclick="showPageFromMore('settings')"><span class="more-item-ico">⚙️</span>Настройки</div>
     </div>
   </div>
@@ -485,7 +579,23 @@ textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
     <div class="modal-title">Новая цель-босс</div>
     <div class="form-row"><label class="form-lbl">Название</label><input class="inp" id="g-name" placeholder="Закрыть долг, переехать..."></div>
     <div class="form-row"><label class="form-lbl">Иконка (эмодзи)</label><input class="inp" id="g-icon" placeholder="🏆" maxlength="2" style="max-width:80px"></div>
-    <div class="form-row"><label class="form-lbl">Прогресс (%)</label><input class="inp" type="number" id="g-pct" placeholder="0" min="0" max="100"></div>
+    <div class="form-row">
+      <label class="form-lbl">Тип прогресса</label>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="radio" name="g-type" value="subtasks" checked> Шаги / чеклист
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="radio" name="g-type" value="numeric" onchange="toggleGoalNumeric(this.checked)"> Число
+        </label>
+      </div>
+    </div>
+    <div id="g-numeric-fields" style="display:none">
+      <div class="g2">
+        <div class="form-row"><label class="form-lbl">Целевое значение</label><input class="inp" type="number" id="g-target" placeholder="100"></div>
+        <div class="form-row"><label class="form-lbl">Единица</label><input class="inp" id="g-unit" placeholder="%" style="max-width:80px"></div>
+      </div>
+    </div>
     <div class="btn-row">
       <button class="btn btn-p" onclick="saveGoal()">Сохранить</button>
       <button class="btn btn-g" onclick="closeModal('modal-goal')">Отмена</button>
@@ -512,6 +622,84 @@ textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
   </div>
 </div>
 
+
+<div class="modal-bg" id="modal-income">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Источник дохода</div>
+    <div class="form-row"><label class="form-lbl">Название</label><input class="inp" id="inc-name" placeholder="Зарплата, фриланс, продажи..."></div>
+    <div class="form-row"><label class="form-lbl">Сумма в месяц (₽)</label><input class="inp" type="number" id="inc-amount" placeholder="45000"></div>
+    <div class="form-row"><label class="form-lbl">Иконка</label><input class="inp" id="inc-icon" placeholder="💼" maxlength="2" style="max-width:70px"></div>
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="saveIncome()">Сохранить</button>
+      <button class="btn btn-g" onclick="closeModal('modal-income')">Отмена</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="modal-savings">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Новая копилка</div>
+    <div class="form-row"><label class="form-lbl">Название</label><input class="inp" id="sav-name" placeholder="На отпуск, подушка..."></div>
+    <div class="form-row"><label class="form-lbl">Цель (₽)</label><input class="inp" type="number" id="sav-target" placeholder="100000"></div>
+    <div class="form-row"><label class="form-lbl">Накоплено сейчас (₽)</label><input class="inp" type="number" id="sav-current" placeholder="0"></div>
+    <div class="form-row"><label class="form-lbl">Иконка</label><input class="inp" id="sav-icon" placeholder="🐷" maxlength="2" style="max-width:70px"></div>
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="saveSavings()">Создать</button>
+      <button class="btn btn-g" onclick="closeModal('modal-savings')">Отмена</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="modal-addsubtask">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Добавить подзадачу</div>
+    <input type="hidden" id="st-goal-id">
+    <div class="form-row"><label class="form-lbl">Подзадача</label><input class="inp" id="st-name" placeholder="Что нужно сделать?"></div>
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="saveSubtask()">Добавить</button>
+      <button class="btn btn-g" onclick="closeModal('modal-addsubtask')">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-achiev">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="achiev-modal-title">Новое достижение</div>
+    <div class="form-row">
+      <label class="form-lbl">Иконка (эмодзи)</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px" id="achiev-icon-pick">
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🏆">🏆</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🥇">🥇</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🌟">🌟</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="💪">💪</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🔥">🔥</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="✨">✨</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🎯">🎯</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🚀">🚀</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="💎">💎</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🦋">🦋</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🌸">🌸</span>
+        <span style="font-size:22px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid transparent" onclick="pickAchievIco(this)" data-ico="🏅">🏅</span>
+      </div>
+      <input class="inp" id="achiev-ico-custom" placeholder="Или введи своё..." maxlength="2" style="max-width:90px">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Название достижения</label>
+      <input class="inp" id="achiev-name-inp" placeholder="Пробежала 5км, прочитала 10 книг...">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Условие / описание</label>
+      <textarea class="inp" id="achiev-desc-inp" placeholder="Что нужно сделать, чтобы получить это достижение?"></textarea>
+    </div>
+    <input type="hidden" id="achiev-edit-id">
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="saveAchiev()">Сохранить</button>
+      <button class="btn btn-g" onclick="closeModal('modal-achiev')">Отмена</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script type="module">
@@ -614,7 +802,7 @@ initFirebase();
 
 <script>
 const DATA_KEY = 'hero_data';
-const DATA_VER = 2;
+const DATA_VER = 3;
 let selHIcon = '⭐';
 let selMood = null;
 let dragId = null;
@@ -625,17 +813,22 @@ let currentPage = 'dashboard';
 function getDefault() {
   return {
     _v: DATA_VER, xp: 0, level: 1, streak: 0, lastCheckIn: null,
-    finance: { debtTotal: 200000, paid: 0, income: 45000, history: [] },
+    finance: {
+      debtTotal: 200000, paid: 0, income: 45000, history: [],
+      incomeSources: [], incomeHistory: [],
+      expenses: [], savings: []
+    },
     habits: [], habitDone: {},
     goals: [
-      { id: uid(), icon: '💸', name: 'Закрыть долг 200К ₽', pct: 0 },
-      { id: uid(), icon: '💰', name: 'Выйти на доход 100К/мес', pct: 0 },
-      { id: uid(), icon: '🏠', name: 'Переехать', pct: 0 },
-      { id: uid(), icon: '✍️', name: 'Вести блог (10 постов)', pct: 0 }
+      { id: uid(), icon: '💸', name: 'Закрыть долг 200К ₽', type: 'numeric', current: 0, target: 200000, unit: '₽', subtasks: [] },
+      { id: uid(), icon: '💰', name: 'Выйти на доход 100К/мес', type: 'numeric', current: 45000, target: 100000, unit: '₽/мес', subtasks: [] },
+      { id: uid(), icon: '🏠', name: 'Переехать', type: 'subtasks', subtasks: [{id:uid(),name:'Найти квартиру',done:false},{id:uid(),name:'Накопить залог',done:false},{id:uid(),name:'Упаковать вещи',done:false}] },
+      { id: uid(), icon: '✍️', name: 'Вести блог (10 постов)', type: 'numeric', current: 0, target: 10, unit: 'постов', subtasks: [] }
     ],
+    achievements: [], myAchievements: [],
     kanban: { cols: ['📋 Идеи','🔄 В работе','⏸ Пауза','✅ Готово'], cards: [] },
     events: {}, health: { water:0, sleep:null, steps:null, workout:0, date:null },
-    mood: [], notes: [], updatedAt: 0
+    mood: [], notes: [], theme: 'pink', updatedAt: 0
   };
 }
 
@@ -646,6 +839,25 @@ function migrate(d) {
     if (!d.mood) d.mood = [];
     if (!d.health) d.health = { water:0, sleep:null, steps:null, workout:0, date:null };
     if (!d.events) d.events = {};
+  }
+  if (!d._v || d._v < 3) {
+    if (!d.finance.incomeSources) d.finance.incomeSources = [];
+    if (!d.finance.incomeHistory) d.finance.incomeHistory = [];
+    if (!d.finance.expenses) d.finance.expenses = [];
+    if (!d.finance.savings) d.finance.savings = [];
+    if (!d.achievements) d.achievements = [];
+    if (!d.theme) d.theme = 'pink';
+    if (!d.myAchievements) d.myAchievements = [];
+    if (!d.customAchievements) d.customAchievements = [];
+    // migrate old goals format
+    d.goals = (d.goals||[]).map(g => {
+      if (!g.type) g.type = 'subtasks';
+      if (!g.subtasks) g.subtasks = [];
+      if (g.pct !== undefined && !g.current) {
+        g.current = g.pct; g.target = 100; g.unit = '%';
+      }
+      return g;
+    });
     d._v = DATA_VER;
   }
   return d;
@@ -668,26 +880,72 @@ function fmtRub(n) { return Math.round(n).toLocaleString('ru') + ' ₽'; }
 function fmtK(n) { return n >= 1000 ? Math.round(n/1000) + 'K ₽' : n + ' ₽'; }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function xpForLevel(lvl) { return lvl * 500; }
+
+const LEVEL_DATA = [
+  {lvl:1, name:'Новичок', xp:0, reward:'Купи себе вкусный кофе ☕'},
+  {lvl:2, name:'Искатель', xp:300, reward:'Позволь себе маленький каприз 🍰'},
+  {lvl:3, name:'Путник', xp:700, reward:'Сходи куда давно хотела 🎬'},
+  {lvl:4, name:'Боец', xp:1400, reward:'Купи что-то для себя до 1000₽ 🛍'},
+  {lvl:5, name:'Воин', xp:2500, reward:'Побалуй себя спа или массажем 💆'},
+  {lvl:6, name:'Ветеран', xp:4000, reward:'Новая вещь для гардероба 👗'},
+  {lvl:7, name:'Чемпион', xp:6000, reward:'Ужин в ресторане 🍽'},
+  {lvl:8, name:'Герой', xp:9000, reward:'Небольшое путешествие 🌍'},
+  {lvl:9, name:'Легенда', xp:13000, reward:'Что-то о чём давно мечтала 🌟'},
+  {lvl:10, name:'Богиня', xp:18000, reward:'Большая мечта — ты заслужила! 👑'},
+];
+
+function getLevelData(lvl) {
+  return LEVEL_DATA[Math.min(lvl-1, LEVEL_DATA.length-1)];
+}
+
+function xpForLevel(lvl) {
+  const next = LEVEL_DATA[Math.min(lvl, LEVEL_DATA.length-1)];
+  const cur = LEVEL_DATA[Math.min(lvl-1, LEVEL_DATA.length-1)];
+  return next ? next.xp - cur.xp : 5000;
+}
+
 
 function addXP(amount) {
   const d = getData();
   d.xp += amount;
-  const needed = xpForLevel(d.level);
-  if (d.xp >= needed) { d.xp -= needed; d.level++; confetti(); showToast('🎉 УРОВЕНЬ ' + d.level + '! Ты становишься сильнее!'); }
+  let leveled = false;
+  while (true) {
+    const needed = xpForLevel(d.level);
+    if (d.xp >= needed && d.level < LEVEL_DATA.length) {
+      d.xp -= needed;
+      d.level++;
+      leveled = true;
+    } else break;
+  }
   saveData(d); renderXP(d);
+  if (leveled) showLevelUp(d.level);
+  else checkAchievements(d);
+}
+
+function showLevelUp(lvl) {
+  confetti();
+  const ld = getLevelData(lvl);
+  const nextXp = xpForLevel(lvl);
+  document.getElementById('lvlup-num').textContent = lvl;
+  document.getElementById('lvlup-title').textContent = ld.name.toUpperCase();
+  document.getElementById('lvlup-reward').textContent = '🎁 ' + ld.reward;
+  document.getElementById('lvlup-next').textContent = nextXp + ' XP';
+  document.getElementById('lvlup-popup').classList.add('show');
 }
 
 function renderXP(d) {
   if (!d) d = getData();
   const needed = xpForLevel(d.level);
   const pct = Math.min((d.xp / needed) * 100, 100);
+  const ld = getLevelData(d.level);
   document.getElementById('top-lvl').textContent = 'LVL ' + d.level;
   document.getElementById('top-xp').textContent = d.xp;
   const bar = document.getElementById('xp-bar');
   if (bar) bar.style.width = pct + '%';
   const dxp = document.getElementById('d-xp');
   if (dxp) { dxp.textContent = d.xp; const nx = document.getElementById('d-xp-next'); if(nx) nx.textContent = needed; }
+  const hsub = document.getElementById('hero-sub-text');
+  if (hsub && ld) hsub.textContent = ld.name + ' · ' + ld.reward;
 }
 
 function checkStreak() {
@@ -701,7 +959,7 @@ function checkStreak() {
   return d.streak;
 }
 
-const MORE_PAGES = new Set(['habits','goals','finance','health','mood','notes','settings']);
+const MORE_PAGES = new Set(['habits','goals','finance','health','mood','notes','achievements','settings']);
 
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -738,7 +996,7 @@ function showPageFromMore(name) {
 }
 
 function renderPage(name) {
-  const fn = { dashboard:renderDashboard, calendar:renderCalendar, habits:renderHabits, goals:renderGoals, finance:renderFinance, kanban:renderKanban, health:renderHealth, mood:renderMood, notes:renderNotes, settings:renderSettings };
+  const fn = { dashboard:renderDashboard, calendar:renderCalendar, habits:renderHabits, goals:renderGoals, finance:renderFinance, kanban:renderKanban, health:renderHealth, mood:renderMood, notes:renderNotes, achievements:renderAchievements, settings:renderSettings };
   if (fn[name]) fn[name]();
 }
 
@@ -761,7 +1019,7 @@ function renderDashboard() {
   const habEl = se('d-habits');
   if (!(d.habits||[]).length) { habEl.innerHTML = '<div style="font-size:13px;color:var(--t2);padding:4px">Добавь привычки в разделе Привычки</div>'; }
   else { habEl.innerHTML = d.habits.slice(0,5).map(h => `<div class="row-item ${doneSt[h.id]?'done':''}" onclick="toggleHabitDash('${h.id}')"><div class="check-box ${doneSt[h.id]?'on':''}"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="row-body"><div class="row-title">${h.icon||'⭐'} ${h.name}</div></div></div>`).join(''); }
-  se('d-goals').innerHTML = (d.goals||[]).map(g => `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500;margin-bottom:5px"><span>${g.icon} ${g.name}</span><span style="color:var(--p);font-family:var(--fm)">${g.pct}%</span></div><div class="prog-track"><div class="prog-fill" style="width:${g.pct}%"></div></div></div>`).join('');
+  se('d-goals').innerHTML = (d.goals||[]).map(g => { const p=goalPct(g); return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500;margin-bottom:5px"><span>${g.icon} ${g.name}</span><span style="color:var(--p);font-family:var(--fm)">${p}%</span></div><div class="prog-track"><div class="prog-fill" style="width:${p}%"></div></div></div>`; }).join('');
 }
 
 function toggleHabitDash(id) {
@@ -940,15 +1198,91 @@ function saveHabit() {
 function renderGoals() {
   const d = getData(); const el = document.getElementById('goals-list');
   if (!(d.goals||[]).length) { el.innerHTML = '<div class="card" style="text-align:center;color:var(--t2)">Добавь первую цель-босса!</div>'; return; }
-  el.innerHTML = d.goals.map(g => `<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div><div style="font-family:var(--fh);font-size:18px;font-weight:700">${g.icon} ${escHtml(g.name)}</div><div style="font-size:11px;color:var(--t2);margin-top:2px">${g.pct>=100?'✅ Выполнено!':'В процессе'}</div></div><div style="display:flex;gap:6px;align-items:center"><div style="font-family:var(--fm);font-size:22px;font-weight:700;color:var(--p)">${g.pct}%</div><button class="btn btn-g btn-sm btn-ic" onclick="deleteGoal('${g.id}')" style="color:var(--red)">✕</button></div></div><div class="prog-track" style="height:10px"><div class="prog-fill" style="width:${g.pct}%"></div></div><div style="display:flex;gap:6px;margin-top:10px;align-items:center"><input type="range" min="0" max="100" value="${g.pct}" style="flex:1;accent-color:var(--p)" oninput="updateGoalPct('${g.id}',this.value)"><span style="font-size:12px;color:var(--t2);font-family:var(--fm);width:32px;text-align:right" id="gpct-${g.id}">${g.pct}%</span></div></div>`).join('');
+  el.innerHTML = d.goals.map(g => {
+    const pct = goalPct(g);
+    const done = pct >= 100;
+    const subs = g.subtasks||[];
+    let body = '';
+    if (g.type === 'subtasks') {
+      body = `<div style="margin-top:10px">${subs.map(s =>
+        `<div class="row-item ${s.done?'done':''}" onclick="toggleSubtask('${g.id}','${s.id}')" style="margin-bottom:5px;padding:8px 10px">
+          <div class="check-box ${s.done?'on':''}"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="row-body"><div class="row-title" style="font-size:12px">${escHtml(s.name)}</div></div>
+          <button class="btn btn-g btn-sm btn-ic" onclick="event.stopPropagation();delSubtask('${g.id}','${s.id}')" style="color:var(--red);font-size:11px">✕</button>
+        </div>`).join('')}
+        <button class="add-row" onclick="openSubtaskModal('${g.id}')" style="margin-top:4px;font-size:11px;padding:7px 10px">
+          <svg viewBox="0 0 24 24" width="12" height="12"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Добавить шаг
+        </button>
+      </div>`;
+    } else if (g.type === 'numeric') {
+      body = `<div style="margin-top:10px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="inp" type="number" value="${g.current||0}" style="flex:1" onchange="updateGoalNum('${g.id}',this.value)" placeholder="Текущее">
+          <span style="font-size:13px;color:var(--t2)">/ ${g.target} ${escHtml(g.unit||'')}</span>
+        </div>
+      </div>`;
+    }
+    return `<div class="card" style="margin-bottom:10px;border-color:${done?'rgba(0,224,118,.3)':''};background:${done?'rgba(0,224,118,.04)':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--fh);font-size:18px;font-weight:700">${g.icon} ${escHtml(g.name)}</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px">${done?'✅ Выполнено!':'В процессе · '+pct+'%'}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <div style="font-family:var(--fm);font-size:22px;font-weight:700;color:var(--p)">${pct}%</div>
+          <button class="btn btn-g btn-sm btn-ic" onclick="deleteGoal('${g.id}')" style="color:var(--red)">✕</button>
+        </div>
+      </div>
+      <div class="prog-track" style="height:8px"><div class="prog-fill" style="width:${pct}%;background:${done?'linear-gradient(90deg,var(--grn),#00c060)':''}"></div></div>
+      ${body}
+    </div>`;
+  }).join('');
 }
 
-function updateGoalPct(id,val) {
-  const el = document.getElementById('gpct-'+id); if(el) el.textContent=val+'%';
+function toggleSubtask(goalId, subId) {
+  const d = getData();
+  const g = d.goals.find(x=>x.id===goalId); if(!g) return;
+  const s = (g.subtasks||[]).find(x=>x.id===subId); if(!s) return;
+  s.done = !s.done;
+  const pct = goalPct(g);
+  if (pct >= 100) { confetti(); showToast('🏆 ЦЕЛЬ ВЫПОЛНЕНА! '+g.name); addXP(200); }
+  else if (s.done) addXP(15);
+  saveData(d); renderGoals(); checkAchievements(getData());
+}
+
+function delSubtask(goalId, subId) {
+  const d = getData();
+  const g = d.goals.find(x=>x.id===goalId); if(!g) return;
+  g.subtasks = (g.subtasks||[]).filter(s=>s.id!==subId);
+  saveData(d); renderGoals();
+}
+
+function openSubtaskModal(goalId) {
+  document.getElementById('st-goal-id').value = goalId;
+  document.getElementById('st-name').value = '';
+  openModal('modal-addsubtask');
+}
+
+function saveSubtask() {
+  const name = document.getElementById('st-name').value.trim();
+  if (!name) { showToast('Введи шаг'); return; }
+  const goalId = document.getElementById('st-goal-id').value;
+  const d = getData();
+  const g = d.goals.find(x=>x.id===goalId); if(!g) return;
+  if (!g.subtasks) g.subtasks = [];
+  g.subtasks.push({id:uid(), name, done:false});
+  saveData(d); addXP(5); closeModal('modal-addsubtask'); renderGoals();
+  showToast('Шаг добавлен ✓');
+}
+
+function updateGoalNum(id, val) {
   const d = getData(); const g = d.goals.find(x=>x.id===id); if(!g) return;
-  const was = g.pct; g.pct=parseInt(val);
-  if (g.pct>=100 && was<100) { confetti(); showToast('🏆 ЦЕЛЬ ДОСТИГНУТА! '+g.name); addXP(200); }
-  saveData(d);
+  const wasP = goalPct(g);
+  g.current = parseFloat(val)||0;
+  const nowP = goalPct(g);
+  if (nowP >= 100 && wasP < 100) { confetti(); showToast('🏆 ЦЕЛЬ ДОСТИГНУТА! '+g.name); addXP(200); }
+  saveData(d); renderGoals(); checkAchievements(getData());
 }
 
 function deleteGoal(id) {
@@ -957,37 +1291,126 @@ function deleteGoal(id) {
 }
 
 function openGoalModal() {
-  document.getElementById('g-name').value=''; document.getElementById('g-icon').value='🏆'; document.getElementById('g-pct').value='0';
+  document.getElementById('g-name').value=''; document.getElementById('g-icon').value='🏆';
+  document.querySelector('input[name="g-type"][value="subtasks"]').checked=true;
+  document.getElementById('g-numeric-fields').style.display='none';
   openModal('modal-goal');
+}
+
+function toggleGoalNumeric(on) {
+  document.getElementById('g-numeric-fields').style.display = on ? '' : 'none';
 }
 
 function saveGoal() {
   const name = document.getElementById('g-name').value.trim();
   if (!name) { showToast('Введи название'); return; }
+  const typeEl = document.querySelector('input[name="g-type"]:checked');
+  const type = typeEl ? typeEl.value : 'subtasks';
   const d = getData();
-  d.goals.push({id:uid(),name,icon:document.getElementById('g-icon').value||'🏆',pct:parseInt(document.getElementById('g-pct').value)||0});
+  const g = {id:uid(), name, icon:document.getElementById('g-icon').value||'🏆', type, subtasks:[]};
+  if (type === 'numeric') {
+    g.current = 0;
+    g.target = parseFloat(document.getElementById('g-target')?.value)||100;
+    g.unit = document.getElementById('g-unit')?.value||'%';
+  }
+  d.goals.push(g);
   saveData(d); addXP(10); closeModal('modal-goal'); renderGoals(); showToast('Цель добавлена ✓');
 }
 
 /* FINANCE */
+let curFinTab = 'debt';
+
+function finTab(tab) {
+  curFinTab = tab;
+  ['debt','income','expense','savings'].forEach(t => {
+    const el = document.getElementById('fin-tab-'+t);
+    if (el) el.style.display = t===tab ? '' : 'none';
+    const btn = document.getElementById('ftab-'+t);
+    if (btn) { btn.className = t===tab ? 'btn btn-p btn-sm' : 'btn btn-g btn-sm'; }
+  });
+  renderFinance();
+}
+
 function renderFinance() {
   const d = getData(); const f = d.finance;
   const paid = f.paid||0; const total = f.debtTotal||200000;
   const rem = Math.max(0,total-paid);
   const pct = total>0?Math.min(100,Math.round((paid/total)*100)):0;
-  const t3 = Math.round(total*0.2);
-  const m3pct = t3>0?Math.min(100,Math.round((paid/t3)*100)):0;
-  const months = f.income>0?Math.ceil(rem/f.income):null;
   const se = id => document.getElementById(id);
-  se('fin-debt').textContent=fmtRub(rem); se('fin-paid').textContent=fmtRub(paid);
-  se('fin-bar').style.width=pct+'%'; se('fin-pct').textContent=pct+'% закрыто';
-  se('fin-income').textContent=fmtRub(f.income||45000);
-  se('fin-months').textContent=months?months+' мес':'— мес';
-  se('fin-3mo-target').textContent=fmtRub(t3);
-  se('fin-3mo-bar').style.width=m3pct+'%'; se('fin-3mo-pct').textContent=m3pct+'% месячной цели';
-  const h = (f.history||[]).slice(-10).reverse();
-  se('fin-history').innerHTML = h.length?h.map(p=>`<div class="row-item"><div class="row-body"><div class="row-title">${fmtRub(p.amount)}</div><div class="row-sub">${p.date}</div></div><div class="badge grn">погашено</div></div>`).join(''):'<div style="font-size:13px;color:var(--t2)">Платежей пока нет</div>';
-  se('set-debt')&&(se('set-debt').value=total); se('set-income')&&(se('set-income').value=f.income||45000);
+
+  // DEBT TAB
+  if (se('fin-debt')) {
+    se('fin-debt').textContent=fmtRub(rem);
+    se('fin-paid').textContent=fmtRub(paid);
+    se('fin-bar').style.width=pct+'%';
+    se('fin-pct').textContent=pct+'% закрыто';
+    const totalIncome = (f.incomeSources||[]).reduce((s,x)=>s+(x.amount||0),0) || (f.income||45000);
+    const months = totalIncome>0?Math.ceil(rem/totalIncome):null;
+    se('fin-income').textContent=fmtRub(totalIncome);
+    se('fin-months').textContent=months?months+' мес':'— мес';
+    const h = (f.history||[]).slice(-15).reverse();
+    se('fin-history').innerHTML = h.length?h.map(p=>`<div class="row-item"><div class="row-body"><div class="row-title">${fmtRub(p.amount)}</div><div class="row-sub">${p.date}</div></div><div class="badge grn">погашено</div></div>`).join(''):'<div style="font-size:13px;color:var(--t2)">Платежей пока нет</div>';
+  }
+
+  // INCOME TAB
+  if (se('fin-income-list')) {
+    const sources = f.incomeSources||[];
+    const total_inc = sources.reduce((s,x)=>s+(x.amount||0),0);
+    se('fin-total-income').textContent = fmtRub(total_inc);
+    se('fin-income-list').innerHTML = sources.length ? sources.map(s =>
+      `<div class="row-item">
+        <div style="font-size:20px;flex-shrink:0">${s.icon||'💼'}</div>
+        <div class="row-body"><div class="row-title">${escHtml(s.name)}</div><div class="row-sub">${fmtRub(s.amount)}/мес</div></div>
+        <button class="btn btn-g btn-sm btn-ic" onclick="delIncomeSource('${s.id}')" style="color:var(--red)">✕</button>
+      </div>`).join('') : '<div style="font-size:13px;color:var(--t2);padding:4px 0">Добавь источники дохода</div>';
+    const ih = (f.incomeHistory||[]).slice(-10).reverse();
+    se('fin-income-history').innerHTML = ih.length ? ih.map(h =>
+      `<div class="row-item"><div class="row-body"><div class="row-title">${escHtml(h.name)}: ${fmtRub(h.amount)}</div><div class="row-sub">${h.date}</div></div></div>`).join('') : '<div style="font-size:13px;color:var(--t2)">Записей нет</div>';
+  }
+
+  // EXPENSE TAB
+  if (se('fin-exp-history')) {
+    const now = new Date();
+    const thisMonth = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    const exps = (f.expenses||[]).filter(e => (e.date||'').startsWith(thisMonth));
+    const bycat = {};
+    exps.forEach(e => { bycat[e.cat] = (bycat[e.cat]||0) + e.amount; });
+    se('fin-exp-summary').innerHTML = Object.keys(bycat).length ?
+      Object.entries(bycat).sort((a,b)=>b[1]-a[1]).map(([cat,sum]) =>
+        `<div class="row-item"><div class="row-body"><div class="row-title">${cat}</div></div><div style="font-family:var(--fm);color:var(--red);font-weight:600">${fmtRub(sum)}</div></div>`).join('') +
+      `<div style="padding:8px 0;font-size:13px;color:var(--t2);border-top:1px solid var(--bd2);margin-top:4px">Итого: <b style="color:var(--red)">${fmtRub(exps.reduce((s,e)=>s+e.amount,0))}</b></div>`
+      : '<div style="font-size:13px;color:var(--t2)">Расходов в этом месяце нет</div>';
+    const allexp = (f.expenses||[]).slice(-15).reverse();
+    se('fin-exp-history').innerHTML = allexp.length ? allexp.map(e =>
+      `<div class="row-item"><div class="row-body"><div class="row-title">${escHtml(e.name||e.cat)}</div><div class="row-sub">${e.cat} · ${e.date}</div></div><div style="font-family:var(--fm);color:var(--red)">${fmtRub(e.amount)}</div></div>`).join('') : '<div style="font-size:13px;color:var(--t2)">Расходов нет</div>';
+  }
+
+  // SAVINGS TAB
+  if (se('fin-savings-list')) {
+    const savs = f.savings||[];
+    se('fin-savings-list').innerHTML = savs.length ? savs.map(s => {
+      const pct = s.target > 0 ? Math.min(100, Math.round((s.current/s.target)*100)) : 0;
+      return `<div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div><span style="font-size:18px">${s.icon||'🐷'}</span> <b>${escHtml(s.name)}</b></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-family:var(--fm);color:var(--p);font-size:13px">${pct}%</span>
+            <button class="btn btn-g btn-sm btn-ic" onclick="delSavings('${s.id}')" style="color:var(--red)">✕</button>
+          </div>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-top:4px">
+          <span>${fmtRub(s.current)}</span><span>цель: ${fmtRub(s.target)}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input class="inp" type="number" placeholder="Добавить ₽" id="sav-add-${s.id}" style="flex:1">
+          <button class="btn btn-p btn-sm" onclick="addToSavings('${s.id}')">+ Добавить</button>
+        </div>
+      </div>`;
+    }).join('') : '<div style="font-size:13px;color:var(--t2);padding:4px 0">Создай первую копилку!</div>';
+  }
+
+  se('set-debt')&&(se('set-debt').value=f.debtTotal||200000);
 }
 
 function makePayment() {
@@ -996,7 +1419,64 @@ function makePayment() {
   const d = getData(); d.finance.paid=(d.finance.paid||0)+val; d.finance.history=d.finance.history||[];
   d.finance.history.push({amount:val,date:new Date().toLocaleDateString('ru')});
   saveData(d); document.getElementById('payment-inp').value='';
-  addXP(50); showToast('+50 XP! Платёж '+fmtRub(val)+' внесён 💪'); renderFinance();
+  addXP(50); showToast('+50 XP! Платёж '+fmtRub(val)+' внесён 💪');
+  checkAchievements(getData()); renderFinance();
+}
+
+function openIncomeModal() {
+  document.getElementById('inc-name').value=''; document.getElementById('inc-amount').value=''; document.getElementById('inc-icon').value='💼';
+  openModal('modal-income');
+}
+function saveIncome() {
+  const name=document.getElementById('inc-name').value.trim();
+  const amount=parseFloat(document.getElementById('inc-amount').value);
+  if(!name||!amount){showToast('Заполни название и сумму');return;}
+  const d=getData();
+  d.finance.incomeSources=d.finance.incomeSources||[];
+  const src={id:uid(),name,amount,icon:document.getElementById('inc-icon').value||'💼',date:new Date().toLocaleDateString('ru')};
+  d.finance.incomeSources.push(src);
+  d.finance.incomeHistory=d.finance.incomeHistory||[];
+  d.finance.incomeHistory.push({name,amount,date:new Date().toLocaleDateString('ru')});
+  saveData(d); addXP(30); closeModal('modal-income');
+  checkAchievements(getData()); renderFinance(); showToast('+30 XP! Доход добавлен 💰');
+}
+function delIncomeSource(id) {
+  const d=getData(); d.finance.incomeSources=(d.finance.incomeSources||[]).filter(s=>s.id!==id);
+  saveData(d); renderFinance();
+}
+
+function addExpense() {
+  const amount=parseFloat(document.getElementById('exp-amount').value);
+  const name=document.getElementById('exp-name').value.trim();
+  const cat=document.getElementById('exp-cat').value;
+  if(!amount||amount<=0){showToast('Введи сумму');return;}
+  const d=getData(); d.finance.expenses=d.finance.expenses||[];
+  d.finance.expenses.push({id:uid(),amount,name:name||cat,cat,date:new Date().toISOString().slice(0,7)});
+  saveData(d); document.getElementById('exp-amount').value=''; document.getElementById('exp-name').value='';
+  addXP(5); renderFinance(); showToast('Расход записан ✓');
+}
+
+function openSavingsModal() {
+  ['sav-name','sav-target','sav-current'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sav-icon').value='🐷';
+  openModal('modal-savings');
+}
+function saveSavings() {
+  const name=document.getElementById('sav-name').value.trim();
+  const target=parseFloat(document.getElementById('sav-target').value)||0;
+  if(!name){showToast('Введи название');return;}
+  const d=getData(); d.finance.savings=d.finance.savings||[];
+  d.finance.savings.push({id:uid(),name,target,current:parseFloat(document.getElementById('sav-current').value)||0,icon:document.getElementById('sav-icon').value||'🐷'});
+  saveData(d); addXP(10); closeModal('modal-savings'); renderFinance(); showToast('Копилка создана ✓');
+}
+function addToSavings(id) {
+  const val=parseFloat(document.getElementById('sav-add-'+id)?.value);
+  if(!val||val<=0){showToast('Введи сумму');return;}
+  const d=getData(); const s=(d.finance.savings||[]).find(x=>x.id===id);
+  if(s){s.current=(s.current||0)+val; saveData(d); addXP(20); renderFinance(); showToast('+20 XP! В копилке: '+fmtRub(s.current));}
+}
+function delSavings(id) {
+  const d=getData(); d.finance.savings=(d.finance.savings||[]).filter(s=>s.id!==id); saveData(d); renderFinance();
 }
 
 function updateDebtTotal(val) { const d=getData(); d.finance.debtTotal=parseFloat(val)||200000; saveData(d); renderFinance(); }
@@ -1096,6 +1576,7 @@ function renderSettings() {
   const d=getData();
   const sd=document.getElementById('set-debt'); if(sd) sd.value=d.finance.debtTotal||200000;
   const si=document.getElementById('set-income'); if(si) si.value=d.finance.income||45000;
+  if (d.theme) setTheme(d.theme);
 }
 
 
@@ -1179,11 +1660,212 @@ function confetti() {
   }
 }
 
+
+/* ACHIEVEMENTS */
+function goalPct(g) {
+  if (g.type === 'subtasks') {
+    const subs = g.subtasks||[];
+    if (!subs.length) return 0;
+    return Math.round((subs.filter(s=>s.done).length / subs.length) * 100);
+  }
+  if (g.type === 'numeric') {
+    const t = parseFloat(g.target)||1;
+    return Math.min(100, Math.round((parseFloat(g.current)||0) / t * 100));
+  }
+  return g.pct || 0;
+}
+
+/* ── CUSTOM ACHIEVEMENTS ── */
+
+
+
+/* MY ACHIEVEMENTS */
+let selAchievIco = '🏆';
+
+function renderAchievements() {
+  const d = getData();
+  const list = d.myAchievements || [];
+  const el = document.getElementById('my-achiev-list');
+  const empty = document.getElementById('my-achiev-empty');
+  if (!list.length) {
+    el.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const done = list.filter(a => a.done);
+  const todo = list.filter(a => !a.done);
+
+  let html = '';
+
+  if (done.length) {
+    html += `<div style="font-family:var(--fh);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--grn);margin-bottom:8px">✅ Получено (${done.length})</div>`;
+    html += done.map(a => renderAchievCard(a)).join('');
+    if (todo.length) html += '<div style="height:16px"></div>';
+  }
+
+  if (todo.length) {
+    html += `<div style="font-family:var(--fh);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:8px">⏳ В процессе (${todo.length})</div>`;
+    html += todo.map(a => renderAchievCard(a)).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+function renderAchievCard(a) {
+  const dateStr = a.doneDate ? `<div style="font-size:10px;color:var(--t3);font-family:var(--fm);margin-top:2px">${a.doneDate}</div>` : '';
+  return `<div class="card" style="margin-bottom:8px;display:flex;gap:14px;align-items:flex-start;padding:12px 14px;${a.done ? 'border-color:rgba(0,224,118,.25);background:rgba(0,224,118,.04)' : ''}">
+    <div style="font-size:32px;line-height:1;flex-shrink:0;filter:${a.done ? 'none' : 'grayscale(1) opacity(.4)'}">${a.ico || '🏅'}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-family:var(--fh);font-size:16px;font-weight:700;${a.done ? 'color:var(--grn)' : ''}">${escHtml(a.name)}</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:3px;line-height:1.4">${escHtml(a.desc || '')}</div>
+      ${dateStr}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+      <button class="check-box ${a.done ? 'on' : ''}" onclick="toggleAchiev('${a.id}')" title="${a.done ? 'Снять' : 'Выполнено!'}">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+      <button class="btn btn-g btn-sm btn-ic" onclick="editAchiev('${a.id}')" style="font-size:11px;padding:5px" title="Изменить">✏️</button>
+      <button class="btn btn-g btn-sm btn-ic" onclick="deleteAchiev('${a.id}')" style="color:var(--red);font-size:11px;padding:5px" title="Удалить">✕</button>
+    </div>
+  </div>`;
+}
+
+function toggleAchiev(id) {
+  const d = getData();
+  d.myAchievements = d.myAchievements || [];
+  const a = d.myAchievements.find(x => x.id === id);
+  if (!a) return;
+  a.done = !a.done;
+  a.doneDate = a.done ? new Date().toLocaleDateString('ru', {day:'numeric',month:'long',year:'numeric'}) : null;
+  if (a.done) {
+    confetti();
+    showToast('🏆 ' + a.name + ' — достижение получено!');
+    addXP(100);
+  }
+  saveData(d);
+  renderAchievements();
+}
+
+function openAchievModal(editId) {
+  selAchievIco = '🏆';
+  document.getElementById('achiev-ico-custom').value = '';
+  document.getElementById('achiev-name-inp').value = '';
+  document.getElementById('achiev-desc-inp').value = '';
+  document.getElementById('achiev-edit-id').value = editId || '';
+  document.getElementById('achiev-modal-title').textContent = editId ? 'Изменить достижение' : 'Новое достижение';
+  document.querySelectorAll('#achiev-icon-pick span').forEach(s => s.style.borderColor = 'transparent');
+
+  if (editId) {
+    const d = getData();
+    const a = (d.myAchievements || []).find(x => x.id === editId);
+    if (a) {
+      selAchievIco = a.ico || '🏆';
+      document.getElementById('achiev-name-inp').value = a.name || '';
+      document.getElementById('achiev-desc-inp').value = a.desc || '';
+      const match = document.querySelector('#achiev-icon-pick [data-ico="'+a.ico+'"]');
+      if (match) match.style.borderColor = 'var(--p)';
+      else document.getElementById('achiev-ico-custom').value = a.ico || '';
+    }
+  }
+  openModal('modal-achiev');
+}
+
+function editAchiev(id) { openAchievModal(id); }
+
+function pickAchievIco(el) {
+  selAchievIco = el.dataset.ico;
+  document.querySelectorAll('#achiev-icon-pick span').forEach(s => s.style.borderColor = 'transparent');
+  el.style.borderColor = 'var(--p)';
+  document.getElementById('achiev-ico-custom').value = '';
+}
+
+function saveAchiev() {
+  const name = document.getElementById('achiev-name-inp').value.trim();
+  if (!name) { showToast('Введи название'); return; }
+  const custom = document.getElementById('achiev-ico-custom').value.trim();
+  const ico = custom || selAchievIco || '🏅';
+  const desc = document.getElementById('achiev-desc-inp').value.trim();
+  const editId = document.getElementById('achiev-edit-id').value;
+  const d = getData();
+  d.myAchievements = d.myAchievements || [];
+
+  if (editId) {
+    const a = d.myAchievements.find(x => x.id === editId);
+    if (a) { a.ico = ico; a.name = name; a.desc = desc; }
+  } else {
+    d.myAchievements.push({ id: uid(), ico, name, desc, done: false, doneDate: null });
+  }
+
+  saveData(d);
+  closeModal('modal-achiev');
+  renderAchievements();
+  showToast(editId ? 'Достижение обновлено ✓' : 'Достижение добавлено! ✓');
+}
+
+function deleteAchiev(id) {
+  if (!confirm('Удалить достижение?')) return;
+  const d = getData();
+  d.myAchievements = (d.myAchievements || []).filter(a => a.id !== id);
+  saveData(d);
+  renderAchievements();
+}
+
+/* THEMES */
+function setTheme(name) {
+  document.body.classList.remove('theme-teal','theme-light');
+  if (name === 'teal') document.body.classList.add('theme-teal');
+  else if (name === 'light') document.body.classList.add('theme-light');
+  const d = getData(); d.theme = name; saveData(d);
+  ['pink','teal','light'].forEach(t => {
+    const btn = document.getElementById('th-'+t);
+    if (!btn) return;
+    btn.className = t===name ? 'btn btn-sm' : 'btn btn-g btn-sm';
+    if (t===name) btn.style.background = 'var(--p)'; else btn.style.background = '';
+    btn.style.color = t===name ? '#fff' : '';
+  });
+}
+
+function applyTheme(name) {
+  document.body.classList.remove('theme-teal','theme-light');
+  if (name === 'teal') document.body.classList.add('theme-teal');
+  else if (name === 'light') document.body.classList.add('theme-light');
+}
+
 /* INIT */
 window.addEventListener('DOMContentLoaded',()=>{
   if(localStorage.getItem(DATA_KEY)) document.getElementById('auth-screen').classList.remove('show');
+  const d = getData();
+  if (d.theme) applyTheme(d.theme);
   checkStreak(); loadAll();
+  checkAchievements(d);
+  // init finance tabs
+  ['income','expense','savings'].forEach(t => {
+    const el = document.getElementById('fin-tab-'+t); if(el) el.style.display='none';
+  });
 });
 </script>
+
+<!-- LEVEL UP POPUP -->
+<div class="lvlup-popup" id="lvlup-popup" onclick="this.classList.remove('show')">
+  <div class="lvlup-card">
+    <div style="font-size:11px;letter-spacing:2px;color:var(--p);font-family:var(--fm);margin-bottom:4px">УРОВЕНЬ</div>
+    <div class="lvlup-num" id="lvlup-num">2</div>
+    <div class="lvlup-title" id="lvlup-title">ИСКАТЕЛЬ</div>
+    <div class="lvlup-subtitle" id="lvlup-reward">🎁 Награди себя чем-то маленьким!</div>
+    <div style="font-size:12px;color:var(--t2);margin-top:8px">До следующего уровня: <b id="lvlup-next" style="color:var(--p)">0 XP</b></div>
+    <button class="btn btn-p" style="margin-top:16px;width:100%" onclick="document.getElementById('lvlup-popup').classList.remove('show')">Продолжить 🚀</button>
+  </div>
+</div>
+<!-- ACHIEV POPUP -->
+<div class="achiev-popup" id="achiev-popup">
+  <div class="achiev-ico" id="achiev-ico">🏆</div>
+  <div class="achiev-body">
+    <div class="achiev-label">Достижение</div>
+    <div class="achiev-name" id="achiev-name">Название</div>
+    <div class="achiev-desc" id="achiev-desc">Описание</div>
+  </div>
+</div>
 </body>
 </html>
