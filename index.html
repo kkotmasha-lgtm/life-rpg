@@ -471,6 +471,11 @@ body.theme-light{--p:#e8186d;--p2:#b5124e;--pg:rgba(232,24,109,.08);--ps:rgba(23
     <div><div class="setting-lbl">Доход в месяц (₽)</div></div>
     <input class="inp" type="number" id="set-income" placeholder="45000" style="width:130px" onchange="updateIncome(this.value)">
   </div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="card-title">Награды за уровни</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:10px">Что ты подаришь себе при достижении каждого уровня?</div>
+    <div id="level-rewards-list"></div>
+  </div>
   <div class="setting-item">
     <div><div class="setting-lbl">Экспорт данных</div><div class="setting-sub">Скачать JSON-файл</div></div>
     <button class="btn btn-g btn-sm" onclick="exportData()">Скачать</button>
@@ -825,7 +830,7 @@ function getDefault() {
       { id: uid(), icon: '🏠', name: 'Переехать', type: 'subtasks', subtasks: [{id:uid(),name:'Найти квартиру',done:false},{id:uid(),name:'Накопить залог',done:false},{id:uid(),name:'Упаковать вещи',done:false}] },
       { id: uid(), icon: '✍️', name: 'Вести блог (10 постов)', type: 'numeric', current: 0, target: 10, unit: 'постов', subtasks: [] }
     ],
-    achievements: [], myAchievements: [],
+    achievements: [], myAchievements: [], levelRewards: LEVEL_DATA_DEFAULT.map(r => r.reward),
     kanban: { cols: ['📋 Идеи','🔄 В работе','⏸ Пауза','✅ Готово'], cards: [] },
     events: {}, health: { water:0, sleep:null, steps:null, workout:0, date:null },
     mood: [], notes: [], theme: 'pink', updatedAt: 0
@@ -848,6 +853,7 @@ function migrate(d) {
     if (!d.achievements) d.achievements = [];
     if (!d.theme) d.theme = 'pink';
     if (!d.myAchievements) d.myAchievements = [];
+    if (!d.levelRewards) d.levelRewards = LEVEL_DATA_DEFAULT.map(r => r.reward);
     if (!d.customAchievements) d.customAchievements = [];
     // migrate old goals format
     d.goals = (d.goals||[]).map(g => {
@@ -881,7 +887,7 @@ function fmtK(n) { return n >= 1000 ? Math.round(n/1000) + 'K ₽' : n + ' ₽';
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 
-const LEVEL_DATA = [
+const LEVEL_DATA_DEFAULT = [
   {lvl:1, name:'Новичок', xp:0, reward:'Купи себе вкусный кофе ☕'},
   {lvl:2, name:'Искатель', xp:300, reward:'Позволь себе маленький каприз 🍰'},
   {lvl:3, name:'Путник', xp:700, reward:'Сходи куда давно хотела 🎬'},
@@ -894,13 +900,33 @@ const LEVEL_DATA = [
   {lvl:10, name:'Богиня', xp:18000, reward:'Большая мечта — ты заслужила! 👑'},
 ];
 
+function getLevelDataArr() {
+  const d = getData();
+  const custom = d.levelRewards || [];
+  return LEVEL_DATA_DEFAULT.map((row, i) => ({
+    ...row,
+    reward: custom[i] !== undefined ? custom[i] : row.reward
+  }));
+}
+
+const LEVEL_DATA = new Proxy([], {
+  get(_, prop) {
+    const arr = getLevelDataArr();
+    if (prop === 'length') return arr.length;
+    const idx = parseInt(prop);
+    return isNaN(idx) ? arr[prop] : arr[idx];
+  }
+});
+
 function getLevelData(lvl) {
-  return LEVEL_DATA[Math.min(lvl-1, LEVEL_DATA.length-1)];
+  const arr = getLevelDataArr();
+  return arr[Math.min(lvl-1, arr.length-1)];
 }
 
 function xpForLevel(lvl) {
-  const next = LEVEL_DATA[Math.min(lvl, LEVEL_DATA.length-1)];
-  const cur = LEVEL_DATA[Math.min(lvl-1, LEVEL_DATA.length-1)];
+  const arr = getLevelDataArr();
+  const next = arr[Math.min(lvl, arr.length-1)];
+  const cur = arr[Math.min(lvl-1, arr.length-1)];
   return next ? next.xp - cur.xp : 5000;
 }
 
@@ -1577,6 +1603,35 @@ function renderSettings() {
   const sd=document.getElementById('set-debt'); if(sd) sd.value=d.finance.debtTotal||200000;
   const si=document.getElementById('set-income'); if(si) si.value=d.finance.income||45000;
   if (d.theme) setTheme(d.theme);
+  renderLevelRewards();
+}
+
+function renderLevelRewards() {
+  const el = document.getElementById('level-rewards-list');
+  if (!el) return;
+  const arr = getLevelDataArr();
+  el.innerHTML = arr.map((row, i) =>
+    `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="flex-shrink:0;width:48px;text-align:center">
+        <div style="font-family:var(--fm);font-size:10px;color:var(--t3);letter-spacing:.5px">LVL</div>
+        <div style="font-family:var(--fh);font-size:18px;font-weight:700;color:var(--p);line-height:1">${row.lvl}</div>
+        <div style="font-size:9px;color:var(--t3);margin-top:1px">${row.name}</div>
+      </div>
+      <input class="inp" style="flex:1;font-size:12px;padding:7px 10px"
+        value="${escHtml(row.reward)}"
+        placeholder="Что подаришь себе?"
+        onchange="saveLevelReward(${i}, this.value)"
+      >
+    </div>`
+  ).join('');
+}
+
+function saveLevelReward(idx, val) {
+  const d = getData();
+  if (!d.levelRewards) d.levelRewards = LEVEL_DATA_DEFAULT.map(r => r.reward);
+  d.levelRewards[idx] = val.trim() || LEVEL_DATA_DEFAULT[idx].reward;
+  saveData(d);
+  showToast('Награда сохранена ✓');
 }
 
 
