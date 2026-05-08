@@ -539,7 +539,8 @@ textarea.inp{resize:vertical;min-height:68px;line-height:1.5}
 <div class="modal-bg" id="modal-goal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Новая цель-босс</div>
+    <div class="modal-title" id="goal-modal-title">Новая цель-босс</div>
+    <input type="hidden" id="goal-edit-id">
     <div class="form-row"><label class="form-lbl">Название</label><input class="inp" id="g-name" placeholder="Закрыть долг, переехать..."></div>
     <div class="form-row"><label class="form-lbl">Иконка</label><input class="inp" id="g-icon" placeholder="🏆" maxlength="2" style="max-width:80px"></div>
     <div class="form-row"><label class="form-lbl">Тип прогресса</label>
@@ -1150,6 +1151,7 @@ function renderGoals(){
         </div>
         <div style="display:flex;gap:6px;align-items:center">
           <div style="font-family:var(--fm);font-size:22px;font-weight:700;color:var(--p)">${pct}%</div>
+          <button class="btn btn-g btn-sm btn-ic" onclick="editGoal('${g.id}')" style="font-size:11px;padding:5px">✏️</button>
           <button class="btn btn-g btn-sm btn-ic" onclick="deleteGoal('${g.id}')" style="color:var(--red)">✕</button>
         </div>
       </div>
@@ -1184,20 +1186,44 @@ function updateGoalNum(id,val){
   saveData(d);renderGoals();
 }
 function deleteGoal(id){if(!confirm('Удалить цель?'))return;const d=getData();d.goals=d.goals.filter(g=>g.id!==id);saveData(d);renderGoals();}
-function openGoalModal(){
-  document.getElementById('g-name').value='';document.getElementById('g-icon').value='🏆';
-  document.querySelector('input[name="g-type"][value="subtasks"]').checked=true;
-  document.getElementById('g-num-fields').style.display='none';
+function openGoalModal(editId){
+  document.getElementById('goal-edit-id').value=editId||'';
+  document.getElementById('goal-modal-title').textContent=editId?'Изменить цель':'Новая цель-босс';
+  if(editId){
+    const d=getData();const g=d.goals.find(x=>x.id===editId);if(!g)return;
+    document.getElementById('g-name').value=g.name||'';
+    document.getElementById('g-icon').value=g.icon||'🏆';
+    const isNum=g.type==='numeric';
+    document.querySelector('input[name="g-type"][value="subtasks"]').checked=!isNum;
+    document.querySelector('input[name="g-type"][value="numeric"]').checked=isNum;
+    document.getElementById('g-num-fields').style.display=isNum?'':'none';
+    if(isNum){document.getElementById('g-target').value=g.target||'';document.getElementById('g-unit').value=g.unit||'';}
+  } else {
+    document.getElementById('g-name').value='';document.getElementById('g-icon').value='🏆';
+    document.querySelector('input[name="g-type"][value="subtasks"]').checked=true;
+    document.getElementById('g-num-fields').style.display='none';
+  }
   openModal('modal-goal');
 }
 function toggleGoalNumeric(on){document.getElementById('g-num-fields').style.display=on?'':'none';}
+function editGoal(id){openGoalModal(id);}
 function saveGoal(){
   const name=document.getElementById('g-name').value.trim();if(!name){showToast('Введи название');return;}
   const type=document.querySelector('input[name="g-type"]:checked')?.value||'subtasks';
+  const editId=document.getElementById('goal-edit-id').value;
   const d=getData();
-  const g={id:uid(),name,icon:document.getElementById('g-icon').value||'🏆',type,subtasks:[],xpAwarded:false};
-  if(type==='numeric'){g.current=0;g.target=parseFloat(document.getElementById('g-target')?.value)||100;g.unit=document.getElementById('g-unit')?.value||'%';}
-  d.goals.push(g);saveData(d);closeModal('modal-goal');renderGoals();showToast('Цель добавлена ✓');
+  if(editId){
+    const g=d.goals.find(x=>x.id===editId);if(!g)return;
+    g.name=name;g.icon=document.getElementById('g-icon').value||'🏆';
+    if(type==='numeric'&&g.type!=='numeric'){g.type='numeric';g.current=0;g.target=parseFloat(document.getElementById('g-target')?.value)||100;g.unit=document.getElementById('g-unit')?.value||'%';}
+    else if(type==='numeric'){g.target=parseFloat(document.getElementById('g-target')?.value)||100;g.unit=document.getElementById('g-unit')?.value||'%';}
+    else{g.type='subtasks';}
+    saveData(d);closeModal('modal-goal');renderGoals();showToast('Цель обновлена ✓');
+  } else {
+    const g={id:uid(),name,icon:document.getElementById('g-icon').value||'🏆',type,subtasks:[],xpAwarded:false};
+    if(type==='numeric'){g.current=0;g.target=parseFloat(document.getElementById('g-target')?.value)||100;g.unit=document.getElementById('g-unit')?.value||'%';}
+    d.goals.push(g);saveData(d);closeModal('modal-goal');renderGoals();showToast('Цель добавлена ✓');
+  }
 }
 
 /* ── FINANCE ── */
